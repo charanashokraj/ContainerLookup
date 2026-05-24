@@ -80,35 +80,81 @@ AMBIGUOUS_KW  = ["available for delivery", "available", "customs cleared"]
 
 
 def normalize_events(events: list) -> dict:
+    """
+    State-machine normalizer — processes events in order to avoid confusing
+    outbound pre-loading events (gate-out empty, gate-in full at origin) with
+    inbound events (discharge, release, empty-return at destination).
+
+    Key rule: release can only occur AFTER discharge; empty-return can only
+    occur AFTER release (or after discharge if description explicitly says empty).
+    """
     result = {
         "dischargeDate": None, "releaseDate": None, "emptyReturnDate": None,
         "currentStatus": None, "lastEventDescription": None,
         "lastEventDate": None, "eta": None,
     }
+    seen_discharge = False
+    seen_release   = False
+    last_actual_desc = None
+    last_actual_date = None
+
     for ev in events:
-        desc = (ev.get("description") or ev.get("eventName") or
-                ev.get("equipmentEventTypeCode") or "").lower()
+        raw_desc = (ev.get("description") or ev.get("eventName") or
+                    ev.get("equipmentEventTypeCode") or "")
+        desc = raw_desc.lower()
         code = (ev.get("equipmentEventTypeCode") or "").upper()
         raw  = ev.get("eventDateTime") or ev.get("date") or ev.get("eventDate") or ""
         date = raw[:10] if raw else ""
+        is_actual = ev.get("isActual", ev.get("actual", True))  # default True for DCSA events
 
         if any(a in desc for a in AMBIGUOUS_KW):
             continue
-        if (code in DISCHARGE_CODES or any(k in desc for k in DISCHARGE_KW)) and not result["dischargeDate"]:
-            result["dischargeDate"] = date
-        if (code in RELEASE_CODES or any(k in desc for k in RELEASE_KW)) and not result["releaseDate"]:
-            result["releaseDate"] = date
-        if (code in EMPTY_CODES or any(k in desc for k in EMPTY_KW)) and not result["emptyReturnDate"]:
-            result["emptyReturnDate"] = date
 
-    if events:
+        # ── Discharge ──────────────────────────────────────────────────────────
+        if not result["dischargeDate"]:
+            if code in DISCHARGE_CODES or any(k in desc for k in DISCHARGE_KW):
+                result["dischargeDate"] = date
+                seen_discharge = True
+
+        # ── Release: ONLY after discharge ──────────────────────────────────────
+        # Prevents "gate out empty" (before loading) from being misread as release
+        if seen_discharge and not result["releaseDate"]:
+            is_empty_event = "empty" in desc
+            if not is_empty_event:
+                if code in RELEASE_CODES or any(k in desc for k in RELEASE_KW):
+                    result["releaseDate"] = date
+                    seen_release = True
+
+        # ── Empty return ───────────────────────────────────────────────────────
+        # Two valid cases:
+        #   1. Description explicitly says "empty" + gate-in code → always safe
+        #   2. Gate-in code after a release (sequence-based)
+        if not result["emptyReturnDate"]:
+            is_empty_event = "empty" in desc
+            if is_empty_event and (code in EMPTY_CODES or any(k in desc for k in EMPTY_KW)):
+                result["emptyReturnDate"] = date
+            elif seen_release and (code in EMPTY_CODES or any(k in desc for k in EMPTY_KW)):
+                result["emptyReturnDate"] = date
+
+        # ── Track last ACTUAL event for current status display ─────────────────
+        if is_actual:
+            last_actual_desc = raw_desc
+            last_actual_date = date
+
+    # Use last actual event for display; fall back to last event overall
+    if last_actual_desc:
+        result["lastEventDescription"] = last_actual_desc
+        result["lastEventDate"]        = last_actual_date
+        result["currentStatus"]        = last_actual_desc
+    elif events:
         last = events[-1]
-        desc = (last.get("description") or last.get("eventName") or
-                last.get("equipmentEventTypeCode") or "")
+        raw_desc = (last.get("description") or last.get("eventName") or
+                    last.get("equipmentEventTypeCode") or "")
         raw  = last.get("eventDateTime") or last.get("date") or last.get("eventDate") or ""
-        result["lastEventDescription"] = desc
+        result["lastEventDescription"] = raw_desc
         result["lastEventDate"]        = raw[:10] if raw else ""
-        result["currentStatus"]        = desc
+        result["currentStatus"]        = raw_desc
+
     return result
 
 
