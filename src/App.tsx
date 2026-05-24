@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Upload, Download, Trash2, FileDown, Settings,
   Zap, BookOpen, RefreshCw, CheckCircle2, AlertCircle,
-  LogOut, Users, Crown, Ship,
+  LogOut, Users, Crown, Ship, History, X, User,
 } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { HelpPage } from './pages/HelpPage';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
@@ -103,6 +104,7 @@ function MainApp() {
   const [showSettings,    setShowSettings]    = useState(false);
   const [showHelp,        setShowHelp]        = useState(false);
   const [showAdminPanel,  setShowAdminPanel]  = useState(false);
+  const [showSessions,    setShowSessions]    = useState(false);
   const [selectedContainer, setSelectedContainer] = useState<ContainerRecord | null>(null);
   const [filters,           setFilters]           = useState<FilterState>(DEFAULT_FILTERS);
   const [autoFetchBanner,   setAutoFetchBanner]   = useState<string | null>(null);
@@ -278,6 +280,17 @@ function MainApp() {
               <Settings size={14} />
             </NavBtn>
 
+            {/* Sessions / uploads history (admin) */}
+            {isAdmin && (
+              <button onClick={() => setShowSessions(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)', color: '#67e8f9' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(6,182,212,0.2)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(6,182,212,0.1)')}>
+                <History size={13} /> Uploads
+              </button>
+            )}
+
             {/* Admin panel */}
             {isAdmin && (
               <button onClick={() => setShowAdminPanel(true)}
@@ -343,9 +356,83 @@ function MainApp() {
       {showUpload     && <UploadModal onClose={() => setShowUpload(false)} />}
       {showSettings   && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showAdminPanel && <AdminUsersPanel onClose={() => setShowAdminPanel(false)} />}
+      {showSessions   && <SessionsPanel onClose={() => setShowSessions(false)} onFilterUser={u => { setFilters(f => ({ ...f, uploadedBy: u })); setShowSessions(false); }} />}
       {selectedContainer && (
         <ContainerDetail container={selectedContainer} onClose={() => setSelectedContainer(null)} />
       )}
+    </div>
+  );
+}
+
+// ── Sessions Panel ────────────────────────────────────────────────────────────
+
+function SessionsPanel({ onClose, onFilterUser }: { onClose: () => void; onFilterUser: (name: string) => void }) {
+  const sessions   = useStore(s => s.sessions);
+  const containers = useStore(s => s.containers);
+  const deleteSession = useStore(s => s.deleteSession);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+      <div className="w-full max-w-xl max-h-[80vh] overflow-y-auto rounded-2xl"
+        style={{ background: 'linear-gradient(135deg, #0a111f, #0d1b2e)', border: '1px solid rgba(255,255,255,0.08)' }}>
+
+        <div className="flex items-center justify-between p-5 sticky top-0 z-10"
+          style={{ background: 'linear-gradient(135deg, #0a111f, #0d1b2e)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div>
+            <h2 className="font-bold text-white flex items-center gap-2"><History size={16} style={{ color: '#67e8f9' }} /> Upload History</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>All container uploads across all users</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-3">
+          {sessions.length === 0 && (
+            <p className="text-center text-sm py-8" style={{ color: 'rgba(255,255,255,0.3)' }}>No uploads yet.</p>
+          )}
+          {sessions.map(s => {
+            const count = containers.filter(c => c.sessionId === s.id).length;
+            return (
+              <div key={s.id} className="rounded-xl px-4 py-3 flex items-center justify-between gap-4"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-white truncate">{s.filename || 'Unknown file'}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ background: 'rgba(6,182,212,0.12)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.2)' }}>
+                      {count} containers
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="flex items-center gap-1 text-xs" style={{ color: 'rgba(167,139,250,0.8)' }}>
+                      <User size={10} />{s.uploadedBy || 'Unknown'}
+                    </span>
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      {s.uploadedAt ? format(parseISO(s.uploadedAt), 'dd MMM yyyy HH:mm') : '–'}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => onFilterUser(s.uploadedBy)}
+                    className="text-xs px-2.5 py-1 rounded-lg transition-all"
+                    style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#67e8f9' }}
+                    title="Filter table to this upload">
+                    View
+                  </button>
+                  <button onClick={() => { if (confirm(`Delete ${count} containers from this upload?`)) deleteSession(s.id); }}
+                    className="p-1.5 rounded-lg transition-all"
+                    style={{ color: 'rgba(239,68,68,0.6)', border: '1px solid rgba(239,68,68,0.15)' }}
+                    title="Delete this upload's containers">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

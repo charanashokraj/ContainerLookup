@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ExternalLink, Eye, CheckCircle, AlertTriangle, RefreshCw, MapPin, Ship, Package, X } from 'lucide-react';
+import { ExternalLink, Eye, CheckCircle, AlertTriangle, RefreshCw, MapPin, Ship, Package, X, User } from 'lucide-react';
 import type { ContainerRecord, FilterState, Priority, ReviewStatus } from '../types';
 import { PriorityBadge, StatusBadge } from './Badge';
 import { useStore } from '../store/useStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { getTrackingUrl } from '../lib/carriers';
 import { format, parseISO, isValid } from 'date-fns';
 
@@ -71,12 +72,13 @@ interface Anchor { id: string; x: number; y: number; }
 const ETA_CHANGED: React.CSSProperties = { color: '#fb923c', fontWeight: 600 };
 
 export function ContainerTable({ filters, onSelect }: Props) {
-  const containers       = useStore(s => s.containers);
-  const markChecked      = useStore(s => s.markChecked);
-  const approveUpdate    = useStore(s => s.approveUpdate);
-  const authUser         = useStore(s => s.currentUser);
+  const containers        = useStore(s => s.containers);
+  const markChecked       = useStore(s => s.markChecked);
+  const approveUpdate     = useStore(s => s.approveUpdate);
+  const authUser          = useStore(s => s.currentUser);
   const setManualPriority = useStore(s => s.setManualPriority);
-  const setReviewStatus  = useStore(s => s.setReviewStatus);
+  const setReviewStatus   = useStore(s => s.setReviewStatus);
+  const isAdmin           = useAuthStore(s => s.profile?.role === 'admin');
 
   const [priorityAnchor, setPriorityAnchor] = useState<Anchor | null>(null);
   const [reviewAnchor, setReviewAnchor]     = useState<Anchor | null>(null);
@@ -241,7 +243,9 @@ export function ContainerTable({ filters, onSelect }: Props) {
           <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                {['Priority','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',''].map(h => (
+                {['Priority','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
+                  ...(isAdmin ? ['Uploaded By'] : []),
+                  ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap"
                     style={{ color: 'rgba(255,255,255,0.35)' }}>
                     {h}
@@ -363,6 +367,17 @@ export function ContainerTable({ filters, onSelect }: Props) {
                         {c.trackingCheckedAt ? fmtDateTime(c.trackingCheckedAt) : '–'}
                       </span>
                     </td>
+
+                    {/* Uploaded By — admin only */}
+                    {isAdmin && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="flex items-center gap-1 text-xs"
+                          style={{ color: c.uploadedBy ? 'rgba(167,139,250,0.8)' : 'rgba(255,255,255,0.2)' }}>
+                          {c.uploadedBy && <User size={10} />}
+                          {c.uploadedBy || '–'}
+                        </span>
+                      </td>
+                    )}
 
                     {/* Actions */}
                     <td className="px-4 py-3">

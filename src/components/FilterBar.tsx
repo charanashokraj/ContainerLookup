@@ -1,6 +1,7 @@
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import type { FilterState, Priority, ReviewStatus } from '../types';
 import { useStore } from '../store/useStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface Props {
   filters: FilterState;
@@ -26,6 +27,7 @@ const DARK_SELECT: React.CSSProperties = {
 
 export function FilterBar({ filters, onChange }: Props) {
   const containers   = useStore(s => s.containers);
+  const isAdmin      = useAuthStore(s => s.profile?.role === 'admin');
   const carriers     = [...new Set(containers.map(c => c.carrier).filter(Boolean))].sort();
   const customers    = [...new Set(containers.map(c => c.customer).filter(Boolean))].sort();
   const destinations = [...new Set(containers.map(c => c.destinationPort).filter(Boolean))].sort();
@@ -103,9 +105,9 @@ export function FilterBar({ filters, onChange }: Props) {
           </select>
         )}
 
-        {uploaders.length > 1 && (
+        {isAdmin && uploaders.length > 0 && (
           <select value={filters.uploadedBy} onChange={e => set('uploadedBy', e.target.value)} style={DARK_SELECT}>
-            <option value="">All Uploads</option>
+            <option value="">All Users</option>
             {uploaders.map(u => <option key={u}>{u}</option>)}
           </select>
         )}
