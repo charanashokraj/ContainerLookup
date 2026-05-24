@@ -156,29 +156,47 @@ function MainApp() {
       setTimeout(() => { setCheckPhase('idle'); setCheckMessage(''); }, 8000);
       return;
     }
+
+    // Poll raw.githubusercontent.com directly — results appear as soon as the
+    // tracking workflow commits, without waiting for a GitHub Pages deploy.
+    const rawBase  = `https://raw.githubusercontent.com/${settings.owner}/${settings.repo}/main/public`;
+    const sinceIso = lastAutoTrackAt ?? new Date(0).toISOString();
+
     const COOLDOWN = 2 * 60 * 1000;
     if (Date.now() - lastTriggerRef.current < COOLDOWN) {
       setCheckPhase('waiting');
-      setCheckMessage('Workflow already triggered — checking for results…');
-      return;
-    }
-    const baseUrl   = `https://${settings.owner}.github.io/${settings.repo}`;
-    const sinceIso  = lastAutoTrackAt ?? new Date(0).toISOString();
-    try {
-      setCheckPhase('triggering');
-      setCheckMessage('Triggering GitHub Actions workflow…');
-      await triggerTrackingWorkflow(settings, false);
-      lastTriggerRef.current = Date.now();
-      setCheckPhase('waiting');
-      setCheckMessage('Workflow running — checking every 20s (2–4 min)…');
-      const data = await pollForUpdatedResults(baseUrl, sinceIso, 6 * 60 * 1000, 20_000);
+      setCheckMessage('Workflow already triggered — checking for latest results…');
+      const data = await pollForUpdatedResults(rawBase, sinceIso, 10 * 60 * 1000, 30_000);
       if (data) {
         mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
         setCheckPhase('done');
         setCheckMessage(`Done — ${data.trackedCount} containers updated.`);
       } else {
         setCheckPhase('done');
-        setCheckMessage('Workflow still running. Results will appear on next page visit.');
+        setCheckMessage('Still running. Results will load automatically when ready.');
+      }
+      setTimeout(() => { setCheckPhase('idle'); setCheckMessage(''); }, 12_000);
+      return;
+    }
+
+    try {
+      setCheckPhase('triggering');
+      setCheckMessage('Triggering GitHub Actions workflow…');
+      await triggerTrackingWorkflow(settings, false);
+      lastTriggerRef.current = Date.now();
+
+      setCheckPhase('waiting');
+      setCheckMessage('Workflow running — typically 5–8 min. Checking every 30s…');
+
+      // 12-min window covers tracking script (3–5 min) + git commit. No deploy wait.
+      const data = await pollForUpdatedResults(rawBase, sinceIso, 12 * 60 * 1000, 30_000);
+      if (data) {
+        mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
+        setCheckPhase('done');
+        setCheckMessage(`Done — ${data.trackedCount} containers updated.`);
+      } else {
+        setCheckPhase('done');
+        setCheckMessage('Tracking still running. Results will load on next visit.');
       }
     } catch (err) {
       setCheckPhase('error');
