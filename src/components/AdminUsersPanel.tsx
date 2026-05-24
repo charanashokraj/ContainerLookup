@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Users, Check, X, ShieldCheck, Ban, Trash2, Crown, Clock, UserCheck, UserX, Search, RefreshCw } from 'lucide-react';
+import { Users, Check, X, ShieldCheck, Ban, Trash2, Crown, Clock, UserCheck, UserX, Search, RefreshCw, Copy, KeyRound } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { loadGithubSettings } from '../lib/githubSync';
 import type { User } from '../lib/auth';
 
 interface Props { onClose: () => void; }
@@ -18,12 +19,24 @@ export default function AdminUsersPanel({ onClose }: Props) {
   const [confirm, setConfirm] = useState<{ id: string; action: string } | null>(null);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   const refresh = async () => {
     setRefreshing(true);
     await refreshUsers();
     setRefreshing(false);
   };
+
+  const copyAccessCode = () => {
+    const settings = loadGithubSettings();
+    if (!settings.pat) return;
+    navigator.clipboard.writeText(settings.pat).then(() => {
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 3000);
+    });
+  };
+
+  const hasCode = !!loadGithubSettings().pat;
 
   const pending = users.filter(u => u.status === 'pending').length;
 
@@ -73,6 +86,18 @@ export default function AdminUsersPanel({ onClose }: Props) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {hasCode && (
+              <button
+                onClick={copyAccessCode} title="Copy access code to share with new users"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={{
+                  color: codeCopied ? '#4ade80' : '#a78bfa',
+                  background: codeCopied ? 'rgba(34,197,94,0.1)' : 'rgba(139,92,246,0.08)',
+                  border: codeCopied ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(139,92,246,0.2)',
+                }}>
+                {codeCopied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /><KeyRound size={12} /> Access Code</>}
+              </button>
+            )}
             <button
               onClick={refresh} disabled={refreshing} title="Refresh user list from GitHub"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"

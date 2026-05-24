@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Ship, Eye, EyeOff, ArrowLeft, Copy, Check,
-  AlertCircle, Loader, UserCog, Key, Info,
+  AlertCircle, Loader, UserCog, Key, Info, KeyRound,
 } from 'lucide-react';
 import {
   hashPassword, generatePassword, buildNewUser, detectGithubPages,
@@ -252,12 +252,15 @@ function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegiste
 // ── Register ──────────────────────────────────────────────────────────────────
 
 function RegisterForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) {
-  const { users, setUsers, registrationConfig } = useAuthStore();
+  const { users, setUsers } = useAuthStore();
+  const urlDetect = detectGithubPages();
   const [name,    setName]    = useState('');
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState('');
   const [confirm, setConfirm] = useState('');
-  const [show,    setShow]    = useState(false);
+  const [code,    setCode]    = useState('');   // access code from admin
+  const [showPw,  setShowPw]  = useState(false);
+  const [showCode,setShowCode]= useState(false);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
   const [done,    setDone]    = useState(false);
@@ -266,27 +269,22 @@ function RegisterForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: ()
     e.preventDefault();
     if (pw !== confirm) return setError('Passwords do not match.');
     if (pw.length < 8)  return setError('Password must be at least 8 characters.');
+    if (!code.trim())   return setError('Access code is required. Ask your admin for the code.');
     setLoading(true);
     setError('');
     const { user, users: updated, error: err } = await buildNewUser(users, email, name, pw, 'user', 'pending');
     if (err || !user || !updated) { setError(err ?? 'Registration failed.'); setLoading(false); return; }
     try {
-      if (registrationConfig) {
-        // Write directly to GitHub using the registration PAT (works from any device)
-        await saveUsersToGithub(updated, {
-          owner: registrationConfig.owner,
-          repo:  registrationConfig.repo,
-          pat:   registrationConfig.registrationPat,
-        });
-        // Update local cache so the new user appears in the store
-        setUsers(updated, false);
-      } else {
-        // Fallback: store in local cache only — admin must be on same device
-        await setUsers(updated, true);
-      }
+      const owner = urlDetect?.owner ?? '';
+      const repo  = urlDetect?.repo  ?? '';
+      if (!owner || !repo) throw new Error('Could not detect repository. Contact your admin.');
+      // Write directly to GitHub using the access code (PAT) provided by the admin
+      await saveUsersToGithub(updated, { owner, repo, pat: code.trim() });
+      // Update local store cache (no second GitHub write)
+      setUsers(updated, false);
       setDone(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to submit registration. Please contact admin.');
+      setError(e instanceof Error ? e.message : 'Failed to submit registration. Check the access code and try again.');
     } finally {
       setLoading(false);
     }
@@ -313,7 +311,7 @@ function RegisterForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: ()
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5">
+    <form onSubmit={submit} className="space-y-4">
       <div>
         <h2 className="font-bold text-xl text-white mb-1">Request access</h2>
         <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -323,8 +321,34 @@ function RegisterForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: ()
 
       <Field label="Full Name"     value={name}    onChange={setName}    placeholder="Your name" autoFocus />
       <Field label="Work Email"    value={email}   onChange={setEmail}   placeholder="you@company.com" type="email" />
-      <PasswordField label="Password" value={pw} onChange={setPw} show={show} onToggle={() => setShow(v => !v)} />
-      <Field label="Confirm Password" value={confirm} onChange={setConfirm} placeholder="Repeat password" type={show ? 'text' : 'password'} />
+      <PasswordField label="Password" value={pw} onChange={setPw} show={showPw} onToggle={() => setShowPw(v => !v)} />
+      <Field label="Confirm Password" value={confirm} onChange={setConfirm} placeholder="Repeat password" type={showPw ? 'text' : 'password'} />
+
+      {/* Access code from admin */}
+      <div>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <span className="flex items-center gap-1.5">
+            <KeyRound size={11} /> Access Code <span style={{ color: '#f87171' }}>*</span>
+          </span>
+        </label>
+        <div className="relative">
+          <input
+            type={showCode ? 'text' : 'password'}
+            value={code}
+            onChange={e => setCode(e.target.value)}
+            placeholder="Paste the code provided by your admin"
+            required
+            className="dark-input w-full px-3 py-2.5 pr-10 rounded-lg text-sm text-white font-mono"
+          />
+          <button type="button" onClick={() => setShowCode(v => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            {showCode ? <EyeOff size={15} /> : <Eye size={15} />}
+          </button>
+        </div>
+        <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          Ask your admin to open User Management and click <strong style={{ color: 'rgba(255,255,255,0.5)' }}>Access Code</strong> to copy and share it with you.
+        </p>
+      </div>
 
       {error && <ErrorBanner message={error} />}
       <SubmitButton loading={loading} label="Request Access" />
