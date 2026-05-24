@@ -26,6 +26,7 @@ import type { ContainerRecord, FilterState } from './types';
 const DEFAULT_FILTERS: FilterState = {
   carrier: '', customer: '', destination: '', status: '',
   priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '',
+  autoTrackedOnly: false,
 };
 
 // ── Root: initialization → landing / auth / app routing ──────────────────────

@@ -88,6 +88,8 @@ function mapRow(row: Record<string, string>, headers: string[]): ContainerRecord
     internalNotes: '',
     markedChecked: false,
     markedCheckedAt: null,
+    manualPriority: null,
+    reviewStatusUserSet: false,
     history: [],
   };
 

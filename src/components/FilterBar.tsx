@@ -35,7 +35,7 @@ export function FilterBar({ filters, onChange }: Props) {
   }
 
   function clearAll() {
-    onChange({ carrier: '', customer: '', destination: '', status: '', priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '' });
+    onChange({ carrier: '', customer: '', destination: '', status: '', priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '', autoTrackedOnly: false });
   }
 
   const activeCount = Object.values(filters).filter(Boolean).length;
@@ -65,6 +65,7 @@ export function FilterBar({ filters, onChange }: Props) {
           <option value="">All Statuses</option>
           <option>Action Required</option>
           <option>Pending Review</option>
+          <option>Auto-Reviewed</option>
           <option>No Update Required</option>
           <option>Completed</option>
         </select>

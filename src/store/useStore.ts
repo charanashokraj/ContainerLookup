@@ -5,6 +5,8 @@ import type {
   UploadSession,
   CarrierEvents,
   CheckHistoryEntry,
+  Priority,
+  ReviewStatus,
 } from '../types';
 import { loadState, saveState } from '../lib/storage';
 import { v4 as uuid } from '../lib/uuid';
@@ -32,6 +34,9 @@ interface Store extends AppState {
   updateNotes: (id: string, notes: string) => void;
   updateAssignedTo: (id: string, assignedTo: string) => void;
   recomputeAll: () => void;
+  // Manual override actions
+  setManualPriority: (id: string, priority: Priority | null) => void;
+  setReviewStatus: (id: string, status: ReviewStatus) => void;
 }
 
 const initial = loadState();
@@ -87,15 +92,19 @@ export const useStore = create<Store>((set, get) => ({
             trackingCheckedAt: new Date().toISOString(),
             trackingCheckedBy: checkedBy,
             trackingSource: source,
+            // Manual tracking clears the reviewStatusUserSet so decision engine takes over
+            reviewStatusUserSet: false,
           };
           const decision = computeDecision(updated);
+          const computedPriority = computePriority({ ...updated, ...decision });
           return {
             ...updated,
             reviewStatus: decision.reviewStatus,
             suggestedAction: decision.suggestedAction,
             suggestedEventDate: decision.suggestedEventDate,
             reason: decision.reason,
-            priority: computePriority({ ...updated, ...decision }),
+            // Respect manual priority override
+            priority: (c.manualPriority ?? null) ?? computedPriority,
           };
         })
       ),
@@ -221,13 +230,29 @@ export const useStore = create<Store>((set, get) => ({
           };
 
           const decision = computeDecision(updated);
+          const computedPriority = computePriority({ ...updated, ...decision });
+
+          // If the user has manually set the review status, keep it; otherwise apply decision.
+          // 'No Update Required' from auto-tracking becomes 'Auto-Reviewed' to signal it was API-verified.
+          let reviewStatus: ReviewStatus;
+          if (c.reviewStatusUserSet ?? false) {
+            reviewStatus = c.reviewStatus; // preserve user's choice
+          } else {
+            reviewStatus = decision.reviewStatus === 'No Update Required'
+              ? 'Auto-Reviewed'
+              : decision.reviewStatus;
+          }
+
           return {
             ...updated,
-            reviewStatus: decision.reviewStatus,
+            reviewStatus,
+            reviewStatusUserSet: c.reviewStatusUserSet ?? false,
             suggestedAction: decision.suggestedAction,
             suggestedEventDate: decision.suggestedEventDate,
             reason: decision.reason,
-            priority: computePriority({ ...updated, ...decision }),
+            // Respect manual priority; fall back to computed
+            priority: (c.manualPriority ?? null) ?? computedPriority,
+            manualPriority: c.manualPriority ?? null,
           };
         })
       ),
@@ -240,15 +265,45 @@ export const useStore = create<Store>((set, get) => ({
       containers: sortContainers(
         s.containers.map((c) => {
           const decision = computeDecision(c);
+          const computedPriority = computePriority({ ...c, ...decision });
           return {
             ...c,
-            reviewStatus: decision.reviewStatus,
+            // Keep user-set review status and manual priority across recomputes
+            reviewStatus: (c.reviewStatusUserSet ?? false) ? c.reviewStatus : decision.reviewStatus,
             suggestedAction: decision.suggestedAction,
             suggestedEventDate: decision.suggestedEventDate,
             reason: decision.reason,
-            priority: computePriority({ ...c, ...decision }),
+            priority: (c.manualPriority ?? null) ?? computedPriority,
           };
         })
+      ),
+    }));
+    persist(get());
+  },
+
+  setManualPriority(id, priority) {
+    set((s) => ({
+      containers: sortContainers(
+        s.containers.map((c) => {
+          if (c.id !== id) return c;
+          const computed = computePriority({ ...c, ...computeDecision(c) });
+          return {
+            ...c,
+            manualPriority: priority,
+            priority: priority ?? computed,
+          };
+        })
+      ),
+    }));
+    persist(get());
+  },
+
+  setReviewStatus(id, status) {
+    set((s) => ({
+      containers: s.containers.map((c) =>
+        c.id === id
+          ? { ...c, reviewStatus: status, reviewStatusUserSet: true }
+          : c
       ),
     }));
     persist(get());

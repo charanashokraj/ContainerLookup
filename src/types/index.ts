@@ -9,7 +9,8 @@ export type ReviewStatus =
   | 'No Update Required'
   | 'Action Required'
   | 'Pending Review'
-  | 'Completed';
+  | 'Completed'
+  | 'Auto-Reviewed';
 
 export type Priority = 'High' | 'Medium' | 'Low';
 
@@ -85,6 +86,10 @@ export interface ContainerRecord {
   markedChecked: boolean;
   markedCheckedAt: string | null;
 
+  // Manual overrides (user-set values that survive auto-recompute)
+  manualPriority: Priority | null;         // non-null = user override; null = computed
+  reviewStatusUserSet: boolean;            // true = user changed it; auto-tracking won't overwrite
+
   // History
   history: CheckHistoryEntry[];
 }
@@ -112,4 +117,5 @@ export type FilterState = {
   search: string;
   etaFrom: string;
   etaTo: string;
+  autoTrackedOnly: boolean;
 };
