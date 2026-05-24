@@ -59,10 +59,30 @@ export function cacheUsers(users: User[]): void {
   localStorage.setItem(USERS_CACHE_KEY, JSON.stringify(users));
 }
 
+// ── GitHub Pages URL detection ────────────────────────────────────────────────
+
+/**
+ * Detect owner/repo from the current GitHub Pages URL.
+ * Works on any device without needing localStorage settings.
+ * e.g. https://charanashokraj.github.io/ContainerLookup/  →  { owner: 'charanashokraj', repo: 'ContainerLookup' }
+ */
+export function detectGithubPages(): { owner: string; repo: string } | null {
+  try {
+    const { hostname, pathname } = window.location;
+    const m = hostname.match(/^(.+)\.github\.io$/);
+    if (!m) return null;
+    const owner = m[1];
+    const repo  = pathname.replace(/^\//, '').split('/')[0];
+    if (!repo) return null;
+    return { owner, repo };
+  } catch { return null; }
+}
+
 // ── GitHub-backed storage ─────────────────────────────────────────────────────
 
 /**
- * Fetch users from raw.githubusercontent.com — works from any browser, any device.
+ * Fetch users from raw.githubusercontent.com — works from any browser, any device,
+ * WITHOUT a PAT (public repo read is unauthenticated).
  * Returns null if the file doesn't exist yet (first run) or on network error.
  */
 export async function loadUsersFromGithub(owner: string, repo: string): Promise<User[] | null> {
@@ -72,6 +92,7 @@ export async function loadUsersFromGithub(owner: string, repo: string): Promise<
     if (res.status === 404) return null;   // file not created yet → first run
     if (!res.ok) return null;
     const data = await res.json();
+    // Empty array means no users have been created yet
     return Array.isArray(data) ? data : null;
   } catch { return null; }
 }

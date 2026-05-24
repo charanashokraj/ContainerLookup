@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   Ship, Eye, EyeOff, ArrowLeft, Copy, Check,
-  AlertCircle, Loader, UserCog, GitBranch, Key,
+  AlertCircle, Loader, UserCog, Key, Info,
 } from 'lucide-react';
-import { hashPassword, generatePassword, buildNewUser } from '../lib/auth';
+import { hashPassword, generatePassword, buildNewUser, detectGithubPages } from '../lib/auth';
 import { saveUsersToGithub, cacheUsers } from '../lib/auth';
 import { useAuthStore } from '../store/useAuthStore';
 import { loadGithubSettings, saveGithubSettings } from '../lib/githubSync';
@@ -60,19 +60,26 @@ export default function AuthPage({ initialMode = 'login', isFirstRun, onBack, on
 
 function SetupForm({ onSuccess }: { onSuccess: () => void }) {
   const { login, initialize } = useAuthStore();
-  const existing = loadGithubSettings();
+  const existing  = loadGithubSettings();
+  const urlDetect = detectGithubPages();
+
+  // Owner/repo: prefer stored settings, then URL detection, then defaults
+  const detectedOwner = existing.owner || urlDetect?.owner || '';
+  const detectedRepo  = existing.repo  || urlDetect?.repo  || '';
 
   const [name,    setName]    = useState('');
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState(generatePassword());
   const [show,    setShow]    = useState(false);
   const [copied,  setCopied]  = useState(false);
-  const [owner,   setOwner]   = useState(existing.owner || 'charanashokraj');
-  const [repo,    setRepo]    = useState(existing.repo  || 'ContainerLookup');
-  const [pat,     setPat]     = useState(existing.pat   || '');
+  const [pat,     setPat]     = useState(existing.pat || '');
+  // Only shown when we can't detect owner/repo automatically
+  const [owner,   setOwner]   = useState(detectedOwner);
+  const [repo,    setRepo]    = useState(detectedRepo);
+  const needsManual = !detectedOwner || !detectedRepo;
+
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
-  const [step,    setStep]    = useState<1 | 2>(1);
 
   const copy = () => {
     navigator.clipboard.writeText(pw).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); });
@@ -81,28 +88,26 @@ function SetupForm({ onSuccess }: { onSuccess: () => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return setError('Name and email are required.');
-    if (!owner.trim() || !repo.trim() || !pat.trim()) return setError('GitHub settings are required to sync users across devices.');
+    if (!pat.trim()) return setError('A GitHub PAT is required to save your account across devices.');
+    const finalOwner = (needsManual ? owner : detectedOwner).trim();
+    const finalRepo  = (needsManual ? repo  : detectedRepo).trim();
+    if (!finalOwner || !finalRepo) return setError('Could not detect GitHub repo. Enter owner and repo manually.');
     setLoading(true);
     setError('');
     try {
-      const ghSettings: GithubUserSettings = { owner: owner.trim(), repo: repo.trim(), pat: pat.trim() };
+      const ghSettings: GithubUserSettings = { owner: finalOwner, repo: finalRepo, pat: pat.trim() };
 
       const { user, users, error: buildErr } = await buildNewUser([], email, name, pw, 'admin', 'active');
       if (buildErr || !user || !users) throw new Error(buildErr ?? 'Failed to create admin.');
 
-      // Commit users.json to GitHub so all devices see it
       await saveUsersToGithub(users, ghSettings);
-
-      // Save GitHub settings (same key as SettingsModal)
       saveGithubSettings(ghSettings);
-
-      // Update local cache + store
       cacheUsers(users);
       await initialize();
       login(user);
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Setup failed. Check your GitHub settings and PAT scope (needs "repo").');
+      setError(err instanceof Error ? err.message : 'Setup failed. Check PAT has "repo" scope.');
     } finally {
       setLoading(false);
     }
@@ -117,102 +122,69 @@ function SetupForm({ onSuccess }: { onSuccess: () => void }) {
         </div>
         <div>
           <h2 className="font-bold text-lg text-white">Admin Setup</h2>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            First launch — create admin account &amp; connect GitHub
-          </p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>One-time setup — works on all devices after this</p>
         </div>
       </div>
 
-      {/* Step tabs */}
-      <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-        {([1, 2] as const).map(s => (
-          <button key={s} type="button" onClick={() => setStep(s)}
-            className="flex-1 py-2 text-xs font-medium transition-all"
-            style={{
-              background: step === s ? 'rgba(6,182,212,0.15)' : 'transparent',
-              color: step === s ? '#67e8f9' : 'rgba(255,255,255,0.4)',
-              borderRight: s === 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
-            }}>
-            {s === 1 ? '① Admin account' : '② GitHub sync'}
+      <Field label="Full Name"     value={name}  onChange={setName}  placeholder="Your name" autoFocus />
+      <Field label="Email Address" value={email} onChange={setEmail} placeholder="admin@company.com" type="email" />
+
+      {/* Generated password */}
+      <div>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          Password <span style={{ color: '#facc15' }}>— copy this before continuing</span>
+        </label>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <input type={show ? 'text' : 'password'} value={pw} readOnly
+              className="dark-input w-full px-3 py-2.5 rounded-lg text-sm font-mono pr-10" />
+            <button type="button" onClick={() => setShow(v => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {show ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+          <button type="button" onClick={copy}
+            className="px-3 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all"
+            style={{ background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)' }}>
+            {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
           </button>
-        ))}
+        </div>
+        <p className="text-xs mt-1.5" style={{ color: 'rgba(250,204,21,0.6)' }}>
+          Save this password — it cannot be recovered.
+        </p>
       </div>
 
-      {step === 1 && (
-        <>
-          <Field label="Full Name" value={name} onChange={setName} placeholder="Your name" autoFocus />
-          <Field label="Email Address" value={email} onChange={setEmail} placeholder="admin@company.com" type="email" />
+      {/* GitHub PAT — only field needed (owner/repo auto-detected) */}
+      <div>
+        <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <span className="flex items-center gap-1.5"><Key size={11} /> GitHub Personal Access Token</span>
+        </label>
+        <input type="password" value={pat} onChange={e => setPat(e.target.value)}
+          placeholder="github_pat_…"
+          className="dark-input w-full px-3 py-2.5 rounded-lg text-sm text-white font-mono" required />
+        <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          Needed to save your account to GitHub so every device can log in.
+          Requires <strong style={{ color: 'rgba(255,255,255,0.5)' }}>repo</strong> scope.
+        </p>
+      </div>
 
-          {/* Generated password */}
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Generated Password <span style={{ color: '#facc15' }}>— copy before continuing</span>
-            </label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input type={show ? 'text' : 'password'} value={pw} readOnly
-                  className="dark-input w-full px-3 py-2.5 rounded-lg text-sm font-mono pr-10" />
-                <button type="button" onClick={() => setShow(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  {show ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-              <button type="button" onClick={copy}
-                className="px-3 rounded-lg text-xs flex items-center gap-1.5 font-medium transition-all"
-                style={{ background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)' }}>
-                {copied ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
-              </button>
-            </div>
-            <p className="text-xs mt-1.5" style={{ color: 'rgba(250,204,21,0.6)' }}>
-              Save this password — it cannot be recovered after setup.
-            </p>
-          </div>
-
-          <button type="button" onClick={() => setStep(2)}
-            className="w-full py-3 rounded-xl font-semibold text-sm"
-            style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}>
-            Next → GitHub Setup
-          </button>
-        </>
+      {/* Auto-detected repo info (or manual input if not on GitHub Pages) */}
+      {!needsManual && detectedOwner && (
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs"
+          style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', color: 'rgba(255,255,255,0.5)' }}>
+          <Info size={12} style={{ color: '#4ade80', flexShrink: 0 }} />
+          Detected repo: <strong style={{ color: 'white' }}>{detectedOwner}/{detectedRepo}</strong>
+        </div>
       )}
-
-      {step === 2 && (
+      {needsManual && (
         <>
-          <div className="p-3 rounded-xl text-xs" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7 }}>
-            <div className="flex items-center gap-2 font-medium mb-1" style={{ color: '#67e8f9' }}>
-              <GitBranch size={13} /> Why this is needed
-            </div>
-            User accounts are stored in your GitHub repo so every browser and device sees the same users — no repeated setup in incognito or on a new machine.
-            The PAT needs <strong style={{ color: 'white' }}>repo</strong> scope (same one used for Auto-Track).
-          </div>
-
           <Field label="GitHub Owner (username)" value={owner} onChange={setOwner} placeholder="charanashokraj" />
-          <Field label="Repository Name" value={repo} onChange={setRepo} placeholder="ContainerLookup" />
-
-          <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              <span className="flex items-center gap-1.5"><Key size={11} /> Personal Access Token (PAT)</span>
-            </label>
-            <input type="password" value={pat} onChange={e => setPat(e.target.value)}
-              placeholder="github_pat_…"
-              className="dark-input w-full px-3 py-2.5 rounded-lg text-sm text-white font-mono" required />
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              GitHub → Settings → Developer settings → Personal access tokens → Classic → <em>repo</em> scope
-            </p>
-          </div>
-
-          {error && <ErrorBanner message={error} />}
-
-          <div className="flex gap-2">
-            <button type="button" onClick={() => setStep(1)}
-              className="flex-none px-4 py-3 rounded-xl text-sm font-medium transition-all"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
-              ← Back
-            </button>
-            <SubmitButton loading={loading} label="Create Admin &amp; Save" className="flex-1" />
-          </div>
+          <Field label="Repository Name"         value={repo}  onChange={setRepo}  placeholder="ContainerLookup" />
         </>
       )}
+
+      {error && <ErrorBanner message={error} />}
+      <SubmitButton loading={loading} label="Create Admin Account" />
     </form>
   );
 }

@@ -3,6 +3,7 @@ import type { User, GithubUserSettings } from '../lib/auth';
 import {
   loadUsersFromCache, loadUsersFromGithub, saveUsersToGithub,
   cacheUsers, getSession, setSession, clearSession,
+  detectGithubPages,
 } from '../lib/auth';
 import { loadGithubSettings } from '../lib/githubSync';
 
@@ -10,8 +11,7 @@ interface AuthStore {
   currentUser:  User | null;
   users:        User[];
   initialized:  boolean;
-  initError:    string | null;
-  ghSettings:   GithubUserSettings | null;
+  ghSettings:   GithubUserSettings | null;   // only set when PAT is available (for writes)
 
   initialize:     () => Promise<void>;
   login:          (user: User) => void;
@@ -27,31 +27,42 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   currentUser:  null,
   users:        loadUsersFromCache(),
   initialized:  false,
-  initError:    null,
   ghSettings:   null,
 
   async initialize() {
-    // Load GitHub settings (same key used by SettingsModal / auto-tracking)
-    const gh = loadGithubSettings();
-    const ghSettings: GithubUserSettings | null = gh.owner && gh.repo && gh.pat ? gh : null;
-    set({ ghSettings });
+    // ── Determine owner/repo for reading ──────────────────────────────────
+    // Priority: (1) stored settings  (2) GitHub Pages URL auto-detection
+    // Reading from raw.githubusercontent.com needs NO PAT — works on any device.
+    const stored    = loadGithubSettings();
+    const urlDetect = detectGithubPages();
+
+    const owner = stored.owner || urlDetect?.owner || '';
+    const repo  = stored.repo  || urlDetect?.repo  || '';
+
+    // PAT is only required for WRITE operations (activate, create, etc.)
+    const ghSettings: GithubUserSettings | null =
+      stored.owner && stored.repo && stored.pat
+        ? stored
+        : null;
 
     let users: User[] = [];
-    if (ghSettings) {
-      const remote = await loadUsersFromGithub(ghSettings.owner, ghSettings.repo);
+
+    if (owner && repo) {
+      // Fetch from GitHub — no PAT needed for public repo reads
+      const remote = await loadUsersFromGithub(owner, repo);
       if (remote !== null) {
         users = remote;
-        cacheUsers(users);              // refresh local cache
+        cacheUsers(users);           // keep local cache fresh
       } else {
-        users = loadUsersFromCache();   // fallback to local cache while offline
+        users = loadUsersFromCache(); // network error fallback
       }
     } else {
-      // No GitHub configured yet — use local cache only (first-run or offline)
+      // No GitHub info at all (e.g. running on localhost without settings)
       users = loadUsersFromCache();
     }
 
     const currentUser = getSession(users);
-    set({ users, currentUser, initialized: true, initError: null });
+    set({ users, currentUser, initialized: true, ghSettings });
   },
 
   login(user) {
@@ -74,17 +85,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   async activateUser(id) {
-    const users = get().users.map(u =>
-      u.id === id ? { ...u, status: 'active' as const, activatedAt: new Date().toISOString() } : u
+    await get().setUsers(
+      get().users.map(u =>
+        u.id === id ? { ...u, status: 'active' as const, activatedAt: new Date().toISOString() } : u
+      )
     );
-    await get().setUsers(users);
   },
 
   async deactivateUser(id) {
-    const users = get().users.map(u =>
-      u.id === id ? { ...u, status: 'disabled' as const } : u
+    await get().setUsers(
+      get().users.map(u =>
+        u.id === id ? { ...u, status: 'disabled' as const } : u
+      )
     );
-    await get().setUsers(users);
   },
 
   async deleteUser(id) {
@@ -92,9 +105,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   async promoteToAdmin(id) {
-    const users = get().users.map(u =>
-      u.id === id ? { ...u, role: 'admin' as const } : u
+    await get().setUsers(
+      get().users.map(u =>
+        u.id === id ? { ...u, role: 'admin' as const } : u
+      )
     );
-    await get().setUsers(users);
   },
 }));
