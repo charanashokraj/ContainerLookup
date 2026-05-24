@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "1cec3944-8e1f-4b34-b9c3-f89a7e3dc592",
+    "email": "charanchakravarthi@gmail.com",
+    "name": "Charan Ashokraj",
+    "passwordHash": "e74dacd0ac827ee368a8ba3c5a66e76935eaf2e2feb3405e187a0102bd8e0bee",
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2026-05-24T12:07:56.843Z",
+    "activatedAt": "2026-05-24T12:07:56.843Z"
+  }
+]
