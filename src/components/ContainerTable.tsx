@@ -90,7 +90,7 @@ export function ContainerTable({ filters, onSelect }: Props) {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filtered.map((c) => {
-              const trackingUrl = getTrackingUrl(c.carrier, c.bookingNumber);
+                  const trackingUrl = getTrackingUrl(c.carrier, c.bookingNumber, c.containerNumber);
               const isHighlighted =
                 c.reviewStatus === 'Action Required' || c.reviewStatus === 'Pending Review';
 
