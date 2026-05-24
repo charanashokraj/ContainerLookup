@@ -415,6 +415,7 @@ def track_one(c: dict, creds: dict, tokens: dict, force_all: bool,
                 age_h   = (datetime.now(timezone.utc) - checked).total_seconds() / 3600
                 if age_h < SKIP_IF_CHECKED_WITHIN_HOURS:
                     return cid, {**prev, "skipped": True,
+                                 "containerNumber": container, "bookingNumber": booking,
                                  "reason": f"Checked {age_h:.1f}h ago (< {SKIP_IF_CHECKED_WITHIN_HOURS}h)"}
             except Exception:
                 pass
@@ -444,10 +445,12 @@ def track_one(c: dict, creds: dict, tokens: dict, force_all: bool,
     if data:
         print(f"  ✓ {label} [{source}] {data.get('currentStatus') or ''}")
         return cid, {**data, "checkedAt": _now(), "source": source,
+                     "containerNumber": container, "bookingNumber": booking,
                      "autoTracked": True, "skipped": False, "error": None}
     else:
         print(f"  ✗ {label} {error}")
-        return cid, {"autoTracked": False, "skipped": False, "checkedAt": _now(), "error": error}
+        return cid, {"autoTracked": False, "skipped": False, "checkedAt": _now(),
+                     "containerNumber": container, "bookingNumber": booking, "error": error}
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────

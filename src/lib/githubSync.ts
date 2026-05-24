@@ -73,6 +73,9 @@ export interface AutoTrackingResult {
   currentStatus?: string | null;
   lastEventDescription?: string | null;
   lastEventDate?: string | null;
+  // Stable identifiers — used for fallback matching when container IDs change after re-upload
+  containerNumber?: string;
+  bookingNumber?: string;
   // Location data
   currentLocation?: string | null;
   vesselName?: string | null;

@@ -255,9 +255,17 @@ export const useStore = create<Store>((set, get) => ({
   // ── Auto-tracking merge ───────────────────────────────────────────────────
   mergeAutoTracking(results, updatedAt, trackedCount) {
     set(s => {
+      // Build secondary index: containerNumber → result (fallback when UUIDs changed after re-upload)
+      const byContainerNum: Record<string, AutoTrackingResult> = {};
+      for (const r of Object.values(results)) {
+        if (r.containerNumber && r.autoTracked) byContainerNum[r.containerNumber.toUpperCase()] = r;
+      }
+
       const updated: ContainerRecord[] = [];
       const containers = sortContainers(s.containers.map(c => {
-        const result = results[c.id];
+        // Primary: match by UUID; Secondary: match by container number (survives re-uploads)
+        const result = results[c.id]
+          ?? byContainerNum[c.containerNumber?.toUpperCase() ?? ''];
         if (!result?.autoTracked) return c;
 
         const mergedEvents: CarrierEvents = {

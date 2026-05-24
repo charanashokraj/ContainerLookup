@@ -127,6 +127,30 @@ describe('mergeAutoTracking', () => {
     expect(useStore.getState().containers[0].carrierEta).toBeNull();
   });
 
+  it('matches by containerNumber when UUID has changed after re-upload', () => {
+    // Container in store has NEW uuid (after re-upload)
+    const c = makeContainer({ id: 'new-uuid-after-reupload', containerNumber: 'MSCU9999999', carrierEta: null });
+    useStore.setState({ containers: [c] });
+
+    // auto-tracking.json has OLD uuid but includes containerNumber
+    useStore.getState().mergeAutoTracking(
+      {
+        'old-uuid-before-reupload': {
+          autoTracked: true,
+          checkedAt: new Date().toISOString(),
+          eta: '2099-12-01',
+          currentStatus: 'Vessel Departure',
+          containerNumber: 'MSCU9999999', // ← stable identifier
+        },
+      },
+      new Date().toISOString(),
+      1
+    );
+
+    expect(useStore.getState().containers[0].carrierEta).toBe('2099-12-01');
+    expect(useStore.getState().containers[0].carrierEvents.currentStatus).toBe('Vessel Departure');
+  });
+
   it('sets Auto-Reviewed when no update needed and reviewStatusUserSet is false', () => {
     // Use a far-future ETA so the isEtaOverdue branch never fires
     const futureEta = '2099-12-31';
