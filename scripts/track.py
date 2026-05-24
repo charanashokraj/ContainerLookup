@@ -310,11 +310,14 @@ def _track_sinay(booking, container, api_key, carrier=""):
                 raw_events.extend(cont.get("events", []))
 
             # Map to our normalizer's expected shape
+            # isActual=False events are predictions (e.g. estimated vessel arrival)
+            # — include the flag so the normalizer skips them for currentStatus
             mapped = [
                 {
                     "description":            ev.get("description", ""),
                     "equipmentEventTypeCode": ev.get("eventCode", ""),
                     "eventDateTime":          ev.get("date", ""),
+                    "isActual":               ev.get("isActual", True),
                 }
                 for ev in raw_events
             ]
