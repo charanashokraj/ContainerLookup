@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Upload, Download, Trash2, Container, FileDown, Settings,
+  Upload, Download, Trash2, FileDown, Settings,
   Zap, BookOpen, RefreshCw, CheckCircle2, AlertCircle,
   LogOut, Users, Crown, Ship,
 } from 'lucide-react';
@@ -16,7 +16,6 @@ import { UploadModal } from './components/UploadModal';
 import { SettingsModal } from './components/SettingsModal';
 import { useStore } from './store/useStore';
 import { useAuthStore } from './store/useAuthStore';
-import { loadUsers } from './lib/auth';
 import { exportSapUpdateReport, exportFullReport } from './lib/exporter';
 import {
   fetchAutoTracking, loadGithubSettings,
@@ -29,17 +28,38 @@ const DEFAULT_FILTERS: FilterState = {
   priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '',
 };
 
-// ── Root: handles landing / auth / app routing ────────────────────────────────
+// ── Root: initialization → landing / auth / app routing ──────────────────────
 
 export default function App() {
-  const authUser    = useAuthStore(s => s.currentUser);
-  const isFirstRun  = loadUsers().length === 0;
+  const { currentUser, users, initialized, initialize } = useAuthStore();
 
   type Page = 'landing' | 'login' | 'register';
   const [page, setPage] = useState<Page>('landing');
 
-  // If already logged in, skip straight to the app
-  if (authUser) return <MainApp />;
+  // Run once on mount: fetch users from GitHub, hydrate session
+  useEffect(() => { initialize(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Loading spinner while fetching users from GitHub ──
+  if (!initialized) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-5"
+        style={{ background: '#04071a' }}>
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+          style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', boxShadow: '0 0 30px rgba(6,182,212,0.4)' }}>
+          <Ship size={22} className="text-white" />
+        </div>
+        <div className="flex items-center gap-3">
+          <RefreshCw size={16} className="animate-spin" style={{ color: '#67e8f9' }} />
+          <span className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading ContainerFlow…</span>
+        </div>
+      </div>
+    );
+  }
+
+  // If already logged in, go straight to the app
+  if (currentUser) return <MainApp />;
+
+  const isFirstRun = users.length === 0;
 
   // First run → skip landing, go straight to admin setup
   if (isFirstRun) {

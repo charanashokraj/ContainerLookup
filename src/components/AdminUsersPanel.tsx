@@ -12,7 +12,7 @@ const STATUS_BADGE: Record<User['status'], { label: string; style: React.CSSProp
 };
 
 export default function AdminUsersPanel({ onClose }: Props) {
-  const { users, currentUser, activateUser, deactivateUser, deleteUser, promoteToAdmin, refreshUsers } = useAuthStore();
+  const { users, currentUser, activateUser, deactivateUser, deleteUser, promoteToAdmin, initialize: refreshUsers } = useAuthStore();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | User['status']>('all');
   const [confirm, setConfirm] = useState<{ id: string; action: string } | null>(null);
@@ -29,12 +29,12 @@ export default function AdminUsersPanel({ onClose }: Props) {
   const fmt = (iso: string | null) =>
     iso ? new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
 
-  const act = (id: string, action: string) => {
+  const act = async (id: string, action: string) => {
     switch (action) {
-      case 'activate':  activateUser(id);  break;
-      case 'disable':   deactivateUser(id); break;
-      case 'delete':    deleteUser(id);     break;
-      case 'promote':   promoteToAdmin(id); break;
+      case 'activate':  await activateUser(id);  break;
+      case 'disable':   await deactivateUser(id); break;
+      case 'delete':    await deleteUser(id);     break;
+      case 'promote':   await promoteToAdmin(id); break;
     }
     refreshUsers();
     setConfirm(null);
