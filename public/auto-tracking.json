@@ -1,27 +1,9 @@
 {
-  "updatedAt": "2026-05-24T11:30:05.307830+00:00",
+  "updatedAt": "2026-05-24T11:32:22.964837+00:00",
   "containerCount": 2,
   "trackedCount": 2,
-  "skippedCount": 0,
+  "skippedCount": 2,
   "results": {
-    "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
-      "dischargeDate": null,
-      "releaseDate": null,
-      "emptyReturnDate": null,
-      "currentStatus": "Vessel Departure",
-      "lastEventDescription": "Vessel Departure",
-      "lastEventDate": "2026-05-23",
-      "eta": "2026-08-06",
-      "currentLocation": "MELBOURNE, Australia",
-      "vesselName": "MAERSK SEMAKAU",
-      "portOfLoading": "MELBOURNE",
-      "portOfDischarge": "ALEXANDRIA",
-      "checkedAt": "2026-05-24T11:30:05.131831+00:00",
-      "source": "Sinay API",
-      "autoTracked": true,
-      "skipped": false,
-      "error": null
-    },
     "958c586f-9641-4d84-8d8b-671ccfe9497b": {
       "dischargeDate": null,
       "releaseDate": null,
@@ -37,8 +19,28 @@
       "checkedAt": "2026-05-24T11:30:05.307538+00:00",
       "source": "Sinay API",
       "autoTracked": true,
-      "skipped": false,
-      "error": null
+      "skipped": true,
+      "error": null,
+      "reason": "Checked 0.0h ago (< 3h)"
+    },
+    "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
+      "dischargeDate": null,
+      "releaseDate": null,
+      "emptyReturnDate": null,
+      "currentStatus": "Vessel Departure",
+      "lastEventDescription": "Vessel Departure",
+      "lastEventDate": "2026-05-23",
+      "eta": "2026-08-06",
+      "currentLocation": "MELBOURNE, Australia",
+      "vesselName": "MAERSK SEMAKAU",
+      "portOfLoading": "MELBOURNE",
+      "portOfDischarge": "ALEXANDRIA",
+      "checkedAt": "2026-05-24T11:30:05.131831+00:00",
+      "source": "Sinay API",
+      "autoTracked": true,
+      "skipped": true,
+      "error": null,
+      "reason": "Checked 0.0h ago (< 3h)"
     }
   }
 }
