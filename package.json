@@ -1,0 +1,32 @@
+{
+  "name": "containerlookup",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.3.0",
+    "lucide-react": "^1.16.0",
+    "papaparse": "^5.5.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.0",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.13"
+  }
+}
