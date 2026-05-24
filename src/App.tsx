@@ -8,7 +8,9 @@ import {
   FileDown,
   Settings,
   Zap,
+  BookOpen,
 } from 'lucide-react';
+import { HelpPage } from './pages/HelpPage';
 import { Dashboard } from './components/Dashboard';
 import { FilterBar } from './components/FilterBar';
 import { ContainerTable } from './components/ContainerTable';
@@ -43,6 +45,7 @@ export default function App() {
 
   const [showUpload, setShowUpload] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [selectedContainer, setSelectedContainer] = useState<ContainerRecord | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [editingUser, setEditingUser] = useState(false);
@@ -75,6 +78,8 @@ export default function App() {
     setCurrentUser(userInput.trim() || 'User');
     setEditingUser(false);
   }
+
+  if (showHelp) return <HelpPage onBack={() => setShowHelp(false)} />;
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -159,6 +164,14 @@ export default function App() {
                 </button>
               </>
             )}
+
+            <button
+              onClick={() => setShowHelp(true)}
+              className="flex items-center gap-2 px-3 py-2 text-slate-600 rounded-lg text-sm hover:bg-slate-100 transition-colors border border-slate-200"
+              title="User Guide"
+            >
+              <BookOpen className="w-4 h-4" /> Help
+            </button>
 
             <button
               onClick={() => setShowSettings(true)}
