@@ -335,6 +335,39 @@ def _track_sinay(booking, container, api_key, carrier=""):
             if not norm["currentStatus"] and meta.get("shippingStatus"):
                 norm["currentStatus"] = meta["shippingStatus"].replace("_", " ").title()
 
+            # ── Location & vessel from last actual event ───────────────────────
+            current_location = None
+            vessel_name      = None
+            pol_name         = None
+            pod_name         = None
+
+            for ev in reversed(raw_events):
+                if not ev.get("isActual", True):
+                    continue
+                loc = ev.get("location") or {}
+                city    = loc.get("name", "")
+                country = loc.get("country", "")
+                if city and not current_location:
+                    current_location = f"{city}, {country}" if country else city
+                vessel = ev.get("vessel") or {}
+                if vessel.get("name") and not vessel_name:
+                    vessel_name = vessel["name"]
+                if current_location and vessel_name:
+                    break
+
+            # POL / POD from route object (available when route=true)
+            pol_obj = (route.get("pol") or {}).get("location") or {}
+            pod_obj = (route.get("pod") or {}).get("location") or {}
+            if pol_obj.get("name"):
+                pol_name = pol_obj["name"]
+            if pod_obj.get("name"):
+                pod_name = pod_obj["name"]
+
+            norm["currentLocation"] = current_location
+            norm["vesselName"]      = vessel_name
+            norm["portOfLoading"]   = pol_name
+            norm["portOfDischarge"] = pod_name
+
             return norm
 
         except Exception as e:

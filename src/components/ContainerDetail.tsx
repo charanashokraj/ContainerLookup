@@ -12,6 +12,9 @@ import {
   ArrowRight,
   Copy,
   Check,
+  MapPin,
+  Ship,
+  Navigation,
 } from 'lucide-react';
 import { format, parseISO, isValid } from 'date-fns';
 import type { ContainerRecord } from '../types';
@@ -421,6 +424,56 @@ export function ContainerDetail({ container: c, onClose }: Props) {
                   <Field label="POD" value={liveContainer.pod} />
                 </div>
               </div>
+
+              {/* Live location card — only shown when auto-tracking has data */}
+              {(liveContainer.carrierEvents.currentLocation ||
+                liveContainer.carrierEvents.vesselName) && (
+                <div className="rounded-xl bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 p-4">
+                  <h3 className="text-xs font-semibold text-cyan-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                    <Navigation className="w-3.5 h-3.5" /> Live Location (Auto-Tracked)
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {liveContainer.carrierEvents.currentLocation && (
+                      <div className="bg-white rounded-lg p-3 border border-cyan-100 flex items-start gap-2">
+                        <MapPin className="w-4 h-4 text-cyan-600 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-[10px] text-slate-400 font-semibold uppercase mb-0.5">Last Known Location</p>
+                          <p className="text-sm font-semibold text-slate-800">{liveContainer.carrierEvents.currentLocation}</p>
+                          {liveContainer.carrierEvents.lastEventDate && (
+                            <p className="text-xs text-slate-400 mt-0.5">{fmt(liveContainer.carrierEvents.lastEventDate)}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {liveContainer.carrierEvents.vesselName && (
+                      <div className="bg-white rounded-lg p-3 border border-cyan-100 flex items-start gap-2">
+                        <Ship className="w-4 h-4 text-cyan-600 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-[10px] text-slate-400 font-semibold uppercase mb-0.5">Vessel</p>
+                          <p className="text-sm font-semibold text-slate-800">{liveContainer.carrierEvents.vesselName}</p>
+                          {liveContainer.carrierEvents.currentStatus && (
+                            <p className="text-xs text-slate-400 mt-0.5">{liveContainer.carrierEvents.currentStatus}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <div className="bg-white rounded-lg p-3 border border-cyan-100 flex items-start gap-2">
+                      <Navigation className="w-4 h-4 text-cyan-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-slate-400 font-semibold uppercase mb-0.5">Route</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {liveContainer.carrierEvents.portOfLoading || liveContainer.pol || '?'}
+                          {' → '}
+                          {liveContainer.carrierEvents.portOfDischarge || liveContainer.pod || liveContainer.destinationPort || '?'}
+                        </p>
+                        {liveContainer.carrierEta && (
+                          <p className="text-xs text-slate-400 mt-0.5">ETA {fmt(liveContainer.carrierEta)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Carrier Tracking (recorded)</h3>

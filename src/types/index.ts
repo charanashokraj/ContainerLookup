@@ -30,6 +30,11 @@ export interface CarrierEvents {
   eta: string | null;
   lastEventDescription: string | null;
   lastEventDate: string | null;
+  // Location data from auto-tracking
+  currentLocation: string | null;
+  vesselName: string | null;
+  portOfLoading: string | null;
+  portOfDischarge: string | null;
 }
 
 export interface CheckHistoryEntry {

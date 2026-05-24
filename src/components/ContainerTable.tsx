@@ -1,4 +1,4 @@
-import { ExternalLink, Eye, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { ExternalLink, Eye, CheckCircle, AlertTriangle, RefreshCw, MapPin, Ship } from 'lucide-react';
 import type { ContainerRecord, FilterState } from '../types';
 import { PriorityBadge, StatusBadge } from './Badge';
 import { useStore } from '../store/useStore';
@@ -135,8 +135,18 @@ export function ContainerTable({ filters, onSelect }: Props) {
                       <span className="text-slate-300">–</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-500 text-xs max-w-40 truncate">
-                    {c.carrierEvents.lastEventDescription ?? '–'}
+                  <td className="px-4 py-3 text-xs max-w-48">
+                    <p className="text-slate-600 truncate">{c.carrierEvents.lastEventDescription ?? '–'}</p>
+                    {c.carrierEvents.currentLocation && (
+                      <p className="text-slate-400 flex items-center gap-1 mt-0.5 truncate">
+                        <MapPin className="w-3 h-3 shrink-0" />{c.carrierEvents.currentLocation}
+                      </p>
+                    )}
+                    {c.carrierEvents.vesselName && !c.carrierEvents.currentLocation && (
+                      <p className="text-slate-400 flex items-center gap-1 mt-0.5 truncate">
+                        <Ship className="w-3 h-3 shrink-0" />{c.carrierEvents.vesselName}
+                      </p>
+                    )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <StatusBadge status={c.reviewStatus} />

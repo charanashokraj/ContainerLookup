@@ -73,6 +73,11 @@ export interface AutoTrackingResult {
   currentStatus?: string | null;
   lastEventDescription?: string | null;
   lastEventDate?: string | null;
+  // Location data
+  currentLocation?: string | null;
+  vesselName?: string | null;
+  portOfLoading?: string | null;
+  portOfDischarge?: string | null;
 }
 
 export interface AutoTrackingFile {

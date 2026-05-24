@@ -205,6 +205,10 @@ export const useStore = create<Store>((set, get) => ({
             lastEventDescription: result.lastEventDescription ?? c.carrierEvents.lastEventDescription,
             lastEventDate: result.lastEventDate ?? c.carrierEvents.lastEventDate,
             eta: result.eta ?? c.carrierEvents.eta,
+            currentLocation: result.currentLocation ?? c.carrierEvents.currentLocation,
+            vesselName: result.vesselName ?? c.carrierEvents.vesselName,
+            portOfLoading: result.portOfLoading ?? c.carrierEvents.portOfLoading,
+            portOfDischarge: result.portOfDischarge ?? c.carrierEvents.portOfDischarge,
           };
 
           const updated: ContainerRecord = {

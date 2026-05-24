@@ -54,6 +54,10 @@ export function normalizeCarrierEvents(events: RawCarrierEvent[]): CarrierEvents
     eta: null,
     lastEventDescription: null,
     lastEventDate: null,
+    currentLocation: null,
+    vesselName: null,
+    portOfLoading: null,
+    portOfDischarge: null,
   };
 
   for (const event of events) {
