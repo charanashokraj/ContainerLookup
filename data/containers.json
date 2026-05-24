@@ -5,7 +5,7 @@
     "containerNumber": "CGMU6540930",
     "carrier": "CMA-CGM",
     "sapStatus": "In-Transit",
-    "sapEta": "30/05/2026",
+    "sapEta": "2026-05-30",
     "reviewStatus": "Pending Review"
   },
   {
@@ -14,7 +14,7 @@
     "containerNumber": "MNBU3735878",
     "carrier": "MAERSK",
     "sapStatus": "In-Transit",
-    "sapEta": "30/05/2026",
+    "sapEta": "2026-05-30",
     "reviewStatus": "Pending Review"
   }
 ]

@@ -114,15 +114,24 @@ function MainApp() {
   const [checkMessage, setCheckMessage] = useState('');
   const lastTriggerRef = useRef<number>(0);
 
-  // ── Auto-fetch on mount + 4h background poll ──────────────────────────────
+  // ── Auto-fetch once containers are loaded from Supabase + 4h background poll ─
+  // Runs AFTER `loaded` becomes true so containers exist in the store for merging.
+  // Uses raw.githubusercontent.com (available immediately after a commit; no deploy delay).
   useEffect(() => {
+    if (!loaded) return;  // wait until Supabase load completes
+
     const settings = loadGithubSettings();
     if (!settings.owner || !settings.repo) return;
-    const baseUrl = `https://${settings.owner}.github.io/${settings.repo}`;
+
+    // Always poll raw GitHub — available as soon as the workflow commits
+    const rawBase = `https://raw.githubusercontent.com/${settings.owner}/${settings.repo}/main/public`;
 
     const run = async () => {
-      const data = await fetchAutoTracking(baseUrl);
-      if (!data?.updatedAt || data.trackedCount === 0) return false;
+      const data = await fetchAutoTracking(rawBase);
+      if (!data?.updatedAt) return false;
+      // Merge if we have any tracked results (including from previous skipped runs)
+      const hasResults = Object.values(data.results ?? {}).some(r => r.autoTracked);
+      if (!hasResults) return false;
       if (lastAutoTrackAt && data.updatedAt <= lastAutoTrackAt) return false;
       mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
       return true;
@@ -130,7 +139,7 @@ function MainApp() {
 
     run().then(merged => {
       if (merged) {
-        setAutoFetchBanner('Auto-tracking results loaded — statuses are up to date.');
+        setAutoFetchBanner('Carrier tracking results loaded — statuses are up to date.');
         setTimeout(() => setAutoFetchBanner(null), 6000);
       }
     });
@@ -145,7 +154,7 @@ function MainApp() {
 
     return () => clearInterval(iv);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loaded]);
 
   // ── Check All Now ─────────────────────────────────────────────────────────
   async function handleCheckAll() {

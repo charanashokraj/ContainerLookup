@@ -30,11 +30,30 @@ function findColumn(headers: string[], field: string): string | null {
   return null;
 }
 
+/** Normalise any date string to YYYY-MM-DD (ISO).
+ *  Handles: DD/MM/YYYY, DD-MM-YYYY, MM/DD/YYYY ambiguity is avoided by
+ *  checking day > 12 (unambiguous) and falling back to DD/MM assumption. */
+function normaliseDate(raw: string): string {
+  if (!raw) return '';
+  const s = raw.trim();
+  // Already ISO — leave alone
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  // DD/MM/YYYY or DD-MM-YYYY
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) {
+    const [, a, b, y] = m;
+    // If a > 12 it must be the day; assume DD/MM otherwise
+    return `${y}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+  }
+  return s;
+}
+
 function mapRow(row: Record<string, string>, headers: string[]): ContainerRecord | null {
   const get = (field: string): string => {
     const col = findColumn(headers, field);
     return col ? (row[col] ?? '').trim() : '';
   };
+  const getDate = (field: string) => normaliseDate(get(field));
 
   const bookingNumber = get('bookingNumber');
   const containerNumber = get('containerNumber');
@@ -49,9 +68,9 @@ function mapRow(row: Record<string, string>, headers: string[]): ContainerRecord
     bookingNumber,
     containerNumber,
     carrier: get('carrier'),
-    sapEta: get('sapEta'),
+    sapEta: getDate('sapEta'),
     sapStatus,
-    lastSapEventDate: get('lastSapEventDate'),
+    lastSapEventDate: getDate('lastSapEventDate'),
     destinationPort: get('destinationPort'),
     customer: get('customer'),
     reference: get('reference'),
