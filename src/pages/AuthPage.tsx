@@ -39,9 +39,8 @@ export default function AuthPage({ initialMode = 'login', isFirstRun, onBack, on
         </div>
 
         <div className="glass-card rounded-2xl p-8 animate-fade-up">
-          {view === 'setup'    && <SetupForm onSuccess={onSuccess} />}
-          {view === 'login'    && <LoginForm onSuccess={onSuccess} onRegister={() => setView('register')} />}
-          {view === 'register' && <RegisterForm onSuccess={() => setView('login')} onBack={() => setView('login')} />}
+          {view === 'setup' && <SetupForm onSuccess={onSuccess} />}
+          {view !== 'setup' && <LoginForm onSuccess={onSuccess} />}
         </div>
 
         {!isFirstRun && (
@@ -200,7 +199,7 @@ function SetupForm({ onSuccess }: { onSuccess: () => void }) {
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 
-function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegister: () => void }) {
+function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const { users, login } = useAuthStore();
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState('');
@@ -217,7 +216,7 @@ function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegiste
       u => u.email.toLowerCase() === email.toLowerCase().trim() && u.passwordHash === hash
     );
     if (!user)                       { setLoading(false); return setError('Invalid email or password.'); }
-    if (user.status === 'pending')   { setLoading(false); return setError('Account pending admin approval.'); }
+    if (user.status === 'pending')   { setLoading(false); return setError('Account pending admin approval. Contact your admin.'); }
     if (user.status === 'disabled')  { setLoading(false); return setError('Account disabled — contact admin.'); }
     login(user);
     onSuccess();
@@ -236,14 +235,8 @@ function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegiste
       {error && <ErrorBanner message={error} />}
       <SubmitButton loading={loading} label="Sign In" />
 
-      <p className="text-center text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-        Don't have an account?{' '}
-        <button type="button" onClick={onRegister}
-          className="font-medium" style={{ color: '#67e8f9' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#a5f3fc')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#67e8f9')}>
-          Request access
-        </button>
+      <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
+        Contact your admin to get an account.
       </p>
     </form>
   );
