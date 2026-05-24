@@ -16,6 +16,17 @@ function fmt(dateStr: string | null | undefined): string {
   }
 }
 
+function fmtDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '–';
+  try {
+    const d = parseISO(dateStr);
+    if (!isValid(d)) return dateStr;
+    return format(d, 'dd/MM/yyyy HH:mm');
+  } catch {
+    return dateStr;
+  }
+}
+
 interface Props {
   filters: FilterState;
   onSelect: (container: ContainerRecord) => void;
@@ -155,7 +166,7 @@ export function ContainerTable({ filters, onSelect }: Props) {
                     {c.suggestedAction}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400 whitespace-nowrap">
-                    {c.trackingCheckedAt ? fmt(c.trackingCheckedAt) : '–'}
+                    {c.trackingCheckedAt ? fmtDateTime(c.trackingCheckedAt) : '–'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">

@@ -34,6 +34,17 @@ function fmt(dateStr: string | null | undefined): string {
   }
 }
 
+function fmtDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return '–';
+  try {
+    const d = parseISO(dateStr);
+    if (!isValid(d)) return dateStr;
+    return format(d, 'dd/MM/yyyy HH:mm');
+  } catch {
+    return dateStr;
+  }
+}
+
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
@@ -485,7 +496,7 @@ export function ContainerDetail({ container: c, onClose }: Props) {
                   <Field label="Current Carrier Status" value={liveContainer.carrierEvents.currentStatus} />
                   <Field label="Last Checked" value={
                     liveContainer.trackingCheckedAt
-                      ? `${fmt(liveContainer.trackingCheckedAt)} by ${liveContainer.trackingCheckedBy}`
+                      ? `${fmtDateTime(liveContainer.trackingCheckedAt)} by ${liveContainer.trackingCheckedBy}`
                       : undefined
                   } />
                 </div>
