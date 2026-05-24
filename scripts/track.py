@@ -29,6 +29,7 @@ import requests
 SKIP_IF_CHECKED_WITHIN_HOURS = 3      # skip containers checked less than 3h ago
 MAX_PARALLEL_WORKERS = 10             # parallel API calls
 REQUEST_TIMEOUT = 30
+SINAY_TIMEOUT = 90                    # Sinay free-tier CT lookups can be slow
 
 # ── Carrier SCAC code map (passed to Sinay for faster / more accurate results) ─
 CARRIER_SCAC: dict[str, str] = {
@@ -245,13 +246,17 @@ def _track_sinay(booking, container, api_key, carrier=""):
             params["sealine"] = scac
 
         try:
-            r = requests.get(base, headers=hdrs, params=params, timeout=REQUEST_TIMEOUT)
+            r = requests.get(base, headers=hdrs, params=params, timeout=SINAY_TIMEOUT)
             if not r.ok:
-                print(f"  [Sinay] {stype} {val}: HTTP {r.status_code} — {r.text[:120]}",
+                print(f"  [Sinay] {stype} {val}: HTTP {r.status_code} — {r.text[:200]}",
                       file=sys.stderr)
                 continue
 
             data = r.json()
+            print(f"  [Sinay] {stype} {val}: HTTP 200, "
+                  f"containers={len(data.get('containers', []))}, "
+                  f"status={data.get('metadata', {}).get('shippingStatus', '?')}",
+                  file=sys.stderr)
 
             # Events are nested: containers[].events[]
             raw_events = []

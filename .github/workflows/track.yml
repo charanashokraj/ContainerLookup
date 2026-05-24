@@ -29,6 +29,7 @@ permissions:
 jobs:
   track:
     runs-on: ubuntu-latest
+    timeout-minutes: 15   # Sinay free-tier CT lookups can take up to 90s each
 
     steps:
       - name: Checkout repository
