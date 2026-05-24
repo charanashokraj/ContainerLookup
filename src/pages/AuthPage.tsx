@@ -3,8 +3,10 @@ import {
   Ship, Eye, EyeOff, ArrowLeft, Copy, Check,
   AlertCircle, Loader, UserCog, Key, Info,
 } from 'lucide-react';
-import { hashPassword, generatePassword, buildNewUser, detectGithubPages } from '../lib/auth';
-import { saveUsersToGithub, cacheUsers } from '../lib/auth';
+import {
+  hashPassword, generatePassword, buildNewUser, detectGithubPages,
+  saveUsersToGithub, cacheUsers, saveRegistrationConfig,
+} from '../lib/auth';
 import { useAuthStore } from '../store/useAuthStore';
 import { loadGithubSettings, saveGithubSettings } from '../lib/githubSync';
 import type { GithubUserSettings } from '../lib/auth';
@@ -100,7 +102,14 @@ function SetupForm({ onSuccess }: { onSuccess: () => void }) {
       const { user, users, error: buildErr } = await buildNewUser([], email, name, pw, 'admin', 'active');
       if (buildErr || !user || !users) throw new Error(buildErr ?? 'Failed to create admin.');
 
-      await saveUsersToGithub(users, ghSettings);
+      // Save users and registration config in parallel
+      await Promise.all([
+        saveUsersToGithub(users, ghSettings),
+        saveRegistrationConfig(
+          { owner: ghSettings.owner, repo: ghSettings.repo, registrationPat: ghSettings.pat },
+          ghSettings
+        ),
+      ]);
       saveGithubSettings(ghSettings);
       cacheUsers(users);
       await initialize();
@@ -243,7 +252,7 @@ function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegiste
 // ── Register ──────────────────────────────────────────────────────────────────
 
 function RegisterForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) {
-  const { users, setUsers } = useAuthStore();
+  const { users, setUsers, registrationConfig } = useAuthStore();
   const [name,    setName]    = useState('');
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState('');
@@ -262,10 +271,22 @@ function RegisterForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: ()
     const { user, users: updated, error: err } = await buildNewUser(users, email, name, pw, 'user', 'pending');
     if (err || !user || !updated) { setError(err ?? 'Registration failed.'); setLoading(false); return; }
     try {
-      await setUsers(updated, true);  // commit to GitHub
+      if (registrationConfig) {
+        // Write directly to GitHub using the registration PAT (works from any device)
+        await saveUsersToGithub(updated, {
+          owner: registrationConfig.owner,
+          repo:  registrationConfig.repo,
+          pat:   registrationConfig.registrationPat,
+        });
+        // Update local cache so the new user appears in the store
+        setUsers(updated, false);
+      } else {
+        // Fallback: store in local cache only — admin must be on same device
+        await setUsers(updated, true);
+      }
       setDone(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to submit registration.');
+      setError(e instanceof Error ? e.message : 'Failed to submit registration. Please contact admin.');
     } finally {
       setLoading(false);
     }

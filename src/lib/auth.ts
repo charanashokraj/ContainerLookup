@@ -19,6 +19,7 @@ const USERS_CACHE_KEY = 'ct-users-v1';
 const SESSION_KEY     = 'ct-session-v1';
 const SALT            = 'ct-2026-salt';
 const USERS_PATH      = 'data/users.json';
+const CONFIG_PATH     = 'data/config.json';
 
 // ── Crypto ───────────────────────────────────────────────────────────────────
 
@@ -126,6 +127,69 @@ export async function saveUsersToGithub(
     headers,
     body: JSON.stringify({
       message: `chore: update users [skip ci]`,
+      content,
+      ...(sha ? { sha } : {}),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { message?: string };
+    throw new Error(`GitHub API ${res.status}: ${err.message ?? res.statusText}`);
+  }
+}
+
+// ── Public registration config ────────────────────────────────────────────────
+
+export interface RegistrationConfig {
+  owner: string;
+  repo: string;
+  registrationPat: string;
+}
+
+/**
+ * Fetch data/config.json — stored in the public repo so any device can read the
+ * registration PAT without needing local settings.
+ */
+export async function loadRegistrationConfig(
+  owner: string, repo: string
+): Promise<RegistrationConfig | null> {
+  try {
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/${CONFIG_PATH}?t=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json() as RegistrationConfig;
+    return data.registrationPat ? data : null;
+  } catch { return null; }
+}
+
+/**
+ * Write data/config.json to the repo. Called once during admin setup.
+ * The config contains the PAT used by registration from any device.
+ */
+export async function saveRegistrationConfig(
+  config: RegistrationConfig,
+  ghSettings: GithubUserSettings
+): Promise<void> {
+  const apiUrl = `https://api.github.com/repos/${ghSettings.owner}/${ghSettings.repo}/contents/${CONFIG_PATH}`;
+  const headers = {
+    Authorization: `token ${ghSettings.pat}`,
+    Accept: 'application/vnd.github+json',
+    'Content-Type': 'application/json',
+  };
+
+  let sha: string | undefined;
+  const shaRes = await fetch(apiUrl, { headers });
+  if (shaRes.ok) {
+    const meta = await shaRes.json() as { sha?: string };
+    sha = meta.sha;
+  }
+
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2))));
+  const res = await fetch(apiUrl, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({
+      message: `chore: save registration config [skip ci]`,
       content,
       ...(sha ? { sha } : {}),
     }),

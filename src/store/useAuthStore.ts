@@ -1,17 +1,18 @@
 import { create } from 'zustand';
-import type { User, GithubUserSettings } from '../lib/auth';
+import type { User, GithubUserSettings, RegistrationConfig } from '../lib/auth';
 import {
   loadUsersFromCache, loadUsersFromGithub, saveUsersToGithub,
   cacheUsers, getSession, setSession, clearSession,
-  detectGithubPages,
+  detectGithubPages, loadRegistrationConfig,
 } from '../lib/auth';
 import { loadGithubSettings } from '../lib/githubSync';
 
 interface AuthStore {
-  currentUser:  User | null;
-  users:        User[];
-  initialized:  boolean;
-  ghSettings:   GithubUserSettings | null;   // only set when PAT is available (for writes)
+  currentUser:        User | null;
+  users:              User[];
+  initialized:        boolean;
+  ghSettings:         GithubUserSettings | null;     // admin PAT (only on admin's device)
+  registrationConfig: RegistrationConfig | null;      // public registration PAT (from GitHub)
 
   initialize:     () => Promise<void>;
   login:          (user: User) => void;
@@ -24,10 +25,11 @@ interface AuthStore {
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
-  currentUser:  null,
-  users:        loadUsersFromCache(),
-  initialized:  false,
-  ghSettings:   null,
+  currentUser:        null,
+  users:              loadUsersFromCache(),
+  initialized:        false,
+  ghSettings:         null,
+  registrationConfig: null,
 
   async initialize() {
     // ── Determine owner/repo for reading ──────────────────────────────────
@@ -46,23 +48,28 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         : null;
 
     let users: User[] = [];
+    let registrationConfig: RegistrationConfig | null = null;
 
     if (owner && repo) {
-      // Fetch from GitHub — no PAT needed for public repo reads
-      const remote = await loadUsersFromGithub(owner, repo);
+      // Fetch users and registration config in parallel — no PAT needed for public repo reads
+      const [remote, config] = await Promise.all([
+        loadUsersFromGithub(owner, repo),
+        loadRegistrationConfig(owner, repo),
+      ]);
       if (remote !== null) {
         users = remote;
         cacheUsers(users);           // keep local cache fresh
       } else {
         users = loadUsersFromCache(); // network error fallback
       }
+      registrationConfig = config;
     } else {
       // No GitHub info at all (e.g. running on localhost without settings)
       users = loadUsersFromCache();
     }
 
     const currentUser = getSession(users);
-    set({ users, currentUser, initialized: true, ghSettings });
+    set({ users, currentUser, initialized: true, ghSettings, registrationConfig });
   },
 
   login(user) {

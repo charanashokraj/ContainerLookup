@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Check, X, ShieldCheck, Ban, Trash2, Crown, Clock, UserCheck, UserX, Search } from 'lucide-react';
+import { Users, Check, X, ShieldCheck, Ban, Trash2, Crown, Clock, UserCheck, UserX, Search, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import type { User } from '../lib/auth';
 
@@ -16,6 +16,14 @@ export default function AdminUsersPanel({ onClose }: Props) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | User['status']>('all');
   const [confirm, setConfirm] = useState<{ id: string; action: string } | null>(null);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refresh = async () => {
+    setRefreshing(true);
+    await refreshUsers();
+    setRefreshing(false);
+  };
 
   const pending = users.filter(u => u.status === 'pending').length;
 
@@ -64,13 +72,22 @@ export default function AdminUsersPanel({ onClose }: Props) {
               </p>
             </div>
           </div>
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-            style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}>
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refresh} disabled={refreshing} title="Refresh user list from GitHub"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{ color: refreshing ? 'rgba(255,255,255,0.3)' : '#67e8f9', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
+              {refreshing ? 'Refreshing…' : 'Refresh'}
+            </button>
+            <button onClick={onClose}
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+              style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}>
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
