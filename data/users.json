@@ -8,5 +8,15 @@
     "status": "active",
     "createdAt": "2026-05-24T12:07:56.843Z",
     "activatedAt": "2026-05-24T12:07:56.843Z"
+  },
+  {
+    "id": "05d4153d-8cd0-485d-9e55-a0197f14c10a",
+    "email": "camilale7891@gmail.com",
+    "name": "Camila Lehnen",
+    "passwordHash": "245a174189564c05bcc1815d33e465ba2c6ff51f67365cf4d178b39feeb2c5b7",
+    "role": "user",
+    "status": "pending",
+    "createdAt": "2026-05-24T21:01:43.577Z",
+    "activatedAt": null
   }
 ]
