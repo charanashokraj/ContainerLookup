@@ -1,20 +1,36 @@
 {
-  "updatedAt": "2026-05-24T11:12:58.735486+00:00",
+  "updatedAt": "2026-05-24T11:15:26.350230+00:00",
   "containerCount": 2,
-  "trackedCount": 0,
+  "trackedCount": 2,
   "skippedCount": 0,
   "results": {
     "958c586f-9641-4d84-8d8b-671ccfe9497b": {
-      "autoTracked": false,
+      "dischargeDate": null,
+      "releaseDate": null,
+      "emptyReturnDate": "2026-05-19",
+      "currentStatus": "Vessel Arrival",
+      "lastEventDescription": "Vessel Arrival",
+      "lastEventDate": "2026-06-29",
+      "eta": "2026-06-29",
+      "checkedAt": "2026-05-24T11:15:26.345390+00:00",
+      "source": "Sinay API",
+      "autoTracked": true,
       "skipped": false,
-      "checkedAt": "2026-05-24T11:12:58.730224+00:00",
-      "error": "Not found via available APIs for carrier 'CMA-CGM'"
+      "error": null
     },
     "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
-      "autoTracked": false,
+      "dischargeDate": null,
+      "releaseDate": "2026-05-06",
+      "emptyReturnDate": "2026-05-11",
+      "currentStatus": "Vessel Arrival",
+      "lastEventDescription": "Vessel Arrival",
+      "lastEventDate": "2026-08-06",
+      "eta": "2026-08-06",
+      "checkedAt": "2026-05-24T11:15:26.349978+00:00",
+      "source": "Sinay API",
+      "autoTracked": true,
       "skipped": false,
-      "checkedAt": "2026-05-24T11:12:58.735231+00:00",
-      "error": "Not found via available APIs for carrier 'MAERSK'"
+      "error": null
     }
   }
 }
