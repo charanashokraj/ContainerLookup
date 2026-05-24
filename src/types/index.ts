@@ -90,6 +90,10 @@ export interface ContainerRecord {
   manualPriority: Priority | null;         // non-null = user override; null = computed
   reviewStatusUserSet: boolean;            // true = user changed it; auto-tracking won't overwrite
 
+  // Upload provenance
+  uploadedBy: string;
+  sessionId:  string;
+
   // History
   history: CheckHistoryEntry[];
 }
@@ -99,6 +103,7 @@ export interface UploadSession {
   uploadedAt: string;
   filename: string;
   containerCount: number;
+  uploadedBy: string;   // display name of the user who imported
 }
 
 export interface AppState {
@@ -118,4 +123,5 @@ export type FilterState = {
   etaFrom: string;
   etaTo: string;
   autoTrackedOnly: boolean;
+  uploadedBy: string;
 };

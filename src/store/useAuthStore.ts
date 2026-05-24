@@ -1,121 +1,193 @@
 import { create } from 'zustand';
-import type { User, GithubUserSettings, RegistrationConfig } from '../lib/auth';
-import {
-  loadUsersFromCache, loadUsersFromGithub, saveUsersToGithub,
-  cacheUsers, getSession, setSession, clearSession,
-  detectGithubPages, loadRegistrationConfig,
-} from '../lib/auth';
-import { loadGithubSettings } from '../lib/githubSync';
+import { supabase, type Profile } from '../lib/supabase';
 
 interface AuthStore {
-  currentUser:        User | null;
-  users:              User[];
-  initialized:        boolean;
-  ghSettings:         GithubUserSettings | null;     // admin PAT (only on admin's device)
-  registrationConfig: RegistrationConfig | null;      // public registration PAT (from GitHub)
+  profile:     Profile | null;
+  profiles:    Profile[];       // all profiles — loaded by admin
+  initialized: boolean;
+  isFirstRun:  boolean;
 
-  initialize:     () => Promise<void>;
-  login:          (user: User) => void;
-  logout:         () => void;
-  setUsers:       (users: User[], commit?: boolean) => Promise<void>;
-  activateUser:   (id: string) => Promise<void>;
-  deactivateUser: (id: string) => Promise<void>;
-  deleteUser:     (id: string) => Promise<void>;
-  promoteToAdmin: (id: string) => Promise<void>;
+  initialize:      () => Promise<void>;
+  login:           (email: string, password: string) => Promise<string | null>;
+  logout:          () => Promise<void>;
+  register:        (name: string, email: string, password: string) => Promise<string | null>;
+  setupAdmin:      (name: string, email: string, password: string) => Promise<string | null>;
+
+  // Admin operations
+  loadAllProfiles: () => Promise<void>;
+  activateUser:    (id: string) => Promise<void>;
+  deactivateUser:  (id: string) => Promise<void>;
+  deleteUser:      (id: string) => Promise<void>;
+  promoteToAdmin:  (id: string) => Promise<void>;
+  createUser:      (name: string, email: string, password: string) => Promise<string | null>;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
-  currentUser:        null,
-  users:              loadUsersFromCache(),
-  initialized:        false,
-  ghSettings:         null,
-  registrationConfig: null,
+  profile:     null,
+  profiles:    [],
+  initialized: false,
+  isFirstRun:  false,
 
   async initialize() {
-    // ── Determine owner/repo for reading ──────────────────────────────────
-    // Priority: (1) stored settings  (2) GitHub Pages URL auto-detection
-    // Reading from raw.githubusercontent.com needs NO PAT — works on any device.
-    const stored    = loadGithubSettings();
-    const urlDetect = detectGithubPages();
+    // Check whether any active admin exists (determines first-run state)
+    const { count } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('role', 'admin')
+      .eq('status', 'active');
 
-    const owner = stored.owner || urlDetect?.owner || '';
-    const repo  = stored.repo  || urlDetect?.repo  || '';
+    const isFirstRun = (count ?? 0) === 0;
 
-    // PAT is only required for WRITE operations (activate, create, etc.)
-    const ghSettings: GithubUserSettings | null =
-      stored.owner && stored.repo && stored.pat
-        ? stored
-        : null;
+    // Restore session if one exists
+    const { data: { session } } = await supabase.auth.getSession();
+    let profile: Profile | null = null;
 
-    let users: User[] = [];
-    let registrationConfig: RegistrationConfig | null = null;
-
-    if (owner && repo) {
-      // Fetch users and registration config in parallel — no PAT needed for public repo reads
-      const [remote, config] = await Promise.all([
-        loadUsersFromGithub(owner, repo),
-        loadRegistrationConfig(owner, repo),
-      ]);
-      if (remote !== null) {
-        users = remote;
-        cacheUsers(users);           // keep local cache fresh
-      } else {
-        users = loadUsersFromCache(); // network error fallback
+    if (session?.user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+      if (data && data.status === 'active') {
+        profile = data as Profile;
+      } else if (data) {
+        // Account exists but not active — sign them out silently
+        await supabase.auth.signOut();
       }
-      registrationConfig = config;
-    } else {
-      // No GitHub info at all (e.g. running on localhost without settings)
-      users = loadUsersFromCache();
     }
 
-    const currentUser = getSession(users);
-    set({ users, currentUser, initialized: true, ghSettings, registrationConfig });
+    // Keep session in sync going forward
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        set({ profile: null });
+      }
+    });
+
+    set({ profile, isFirstRun, initialized: true });
   },
 
-  login(user) {
-    setSession(user);
-    set({ currentUser: user });
-  },
+  async login(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return error.message;
 
-  logout() {
-    clearSession();
-    set({ currentUser: null });
-  },
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
 
-  async setUsers(users, commit = true) {
-    cacheUsers(users);
-    set({ users });
-    const { ghSettings } = get();
-    if (commit && ghSettings) {
-      await saveUsersToGithub(users, ghSettings);
+    if (profileError || !profile) {
+      await supabase.auth.signOut();
+      return 'Profile not found. Contact your admin.';
     }
+    if (profile.status === 'pending') {
+      await supabase.auth.signOut();
+      return 'Account pending admin approval.';
+    }
+    if (profile.status === 'disabled') {
+      await supabase.auth.signOut();
+      return 'Account disabled. Contact your admin.';
+    }
+
+    set({ profile: profile as Profile, isFirstRun: false });
+    return null;
+  },
+
+  async logout() {
+    await supabase.auth.signOut();
+    set({ profile: null });
+  },
+
+  async register(name, email, password) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name, role: 'user', status: 'pending' } },
+    });
+    if (error) return error.message;
+    // Sign out immediately — they need admin approval before using the app
+    await supabase.auth.signOut();
+    return null;
+  },
+
+  async setupAdmin(name, email, password) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name, role: 'admin', status: 'active' } },
+    });
+    if (error) return error.message;
+    if (!data.user) return 'Sign-up succeeded but no user returned.';
+
+    // The trigger creates the profile — fetch it to confirm
+    await new Promise(r => setTimeout(r, 800)); // brief wait for trigger
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profile) {
+      set({ profile: profile as Profile, isFirstRun: false });
+    }
+    return null;
+  },
+
+  // ── Admin profile management ────────────────────────────────────────────
+
+  async loadAllProfiles() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (data) set({ profiles: data as Profile[] });
   },
 
   async activateUser(id) {
-    await get().setUsers(
-      get().users.map(u =>
-        u.id === id ? { ...u, status: 'active' as const, activatedAt: new Date().toISOString() } : u
-      )
-    );
+    await supabase
+      .from('profiles')
+      .update({ status: 'active', activated_at: new Date().toISOString() })
+      .eq('id', id);
+    await get().loadAllProfiles();
   },
 
   async deactivateUser(id) {
-    await get().setUsers(
-      get().users.map(u =>
-        u.id === id ? { ...u, status: 'disabled' as const } : u
-      )
-    );
+    await supabase.from('profiles').update({ status: 'disabled' }).eq('id', id);
+    await get().loadAllProfiles();
   },
 
   async deleteUser(id) {
-    await get().setUsers(get().users.filter(u => u.id !== id));
+    // Deleting the profile effectively blocks the user (they can't get past login check)
+    await supabase.from('profiles').delete().eq('id', id);
+    await get().loadAllProfiles();
   },
 
   async promoteToAdmin(id) {
-    await get().setUsers(
-      get().users.map(u =>
-        u.id === id ? { ...u, role: 'admin' as const } : u
-      )
-    );
+    await supabase.from('profiles').update({ role: 'admin' }).eq('id', id);
+    await get().loadAllProfiles();
+  },
+
+  async createUser(name, email, password) {
+    // Save admin session so we can restore it after creating the new user
+    const { data: { session: adminSession } } = await supabase.auth.getSession();
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name, role: 'user', status: 'active' } },
+    });
+
+    if (error) return error.message;
+
+    // Restore admin session
+    if (adminSession?.access_token && adminSession?.refresh_token) {
+      await supabase.auth.setSession({
+        access_token:  adminSession.access_token,
+        refresh_token: adminSession.refresh_token,
+      });
+    }
+
+    await get().loadAllProfiles();
+    return null;
   },
 }));

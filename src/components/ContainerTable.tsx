@@ -45,6 +45,7 @@ function applyFilters(containers: ContainerRecord[], f: FilterState): ContainerR
     if (f.carrier     && c.carrier         !== f.carrier)     return false;
     if (f.customer    && c.customer        !== f.customer)    return false;
     if (f.destination && c.destinationPort !== f.destination) return false;
+    if (f.uploadedBy  && c.uploadedBy      !== f.uploadedBy)  return false;
     return true;
   });
 }

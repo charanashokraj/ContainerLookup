@@ -90,6 +90,8 @@ function mapRow(row: Record<string, string>, headers: string[]): ContainerRecord
     markedCheckedAt: null,
     manualPriority: null,
     reviewStatusUserSet: false,
+    uploadedBy: '',
+    sessionId: '',
     history: [],
   };
 

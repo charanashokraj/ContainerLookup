@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Upload, X, FileText, AlertCircle } from 'lucide-react';
 import { parseFile } from '../lib/sapParser';
 import { useStore } from '../store/useStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface Props {
   onClose: () => void;
@@ -9,6 +10,7 @@ interface Props {
 
 export function UploadModal({ onClose }: Props) {
   const importContainers = useStore((s) => s.importContainers);
+  const profile          = useAuthStore(s => s.profile);
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export function UploadModal({ onClose }: Props) {
       if (records.length === 0) {
         setError('No valid container records found. Check that your file has the required columns (Booking Number, Container Number, Carrier, SAP ETA, SAP Status).');
       } else {
-        importContainers(records, file.name);
+        await importContainers(records, file.name, profile?.name ?? 'Unknown');
         onClose();
       }
     } catch (e: unknown) {

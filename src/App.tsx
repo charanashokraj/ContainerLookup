@@ -26,21 +26,19 @@ import type { ContainerRecord, FilterState } from './types';
 const DEFAULT_FILTERS: FilterState = {
   carrier: '', customer: '', destination: '', status: '',
   priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '',
-  autoTrackedOnly: false,
+  autoTrackedOnly: false, uploadedBy: '',
 };
 
 // ── Root: initialization → landing / auth / app routing ──────────────────────
 
 export default function App() {
-  const { currentUser, users, initialized, initialize } = useAuthStore();
+  const { profile, initialized, isFirstRun, initialize } = useAuthStore();
 
   type Page = 'landing' | 'login' | 'register';
   const [page, setPage] = useState<Page>('landing');
 
-  // Run once on mount: fetch users from GitHub, hydrate session
   useEffect(() => { initialize(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Loading spinner while fetching users from GitHub ──
   if (!initialized) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-5"
@@ -57,12 +55,8 @@ export default function App() {
     );
   }
 
-  // If already logged in, go straight to the app
-  if (currentUser) return <MainApp />;
+  if (profile) return <MainApp />;
 
-  const isFirstRun = users.length === 0;
-
-  // First run → skip landing, go straight to admin setup
   if (isFirstRun) {
     return (
       <AuthPage
@@ -95,15 +89,26 @@ export default function App() {
 // ── Main App (authenticated) ──────────────────────────────────────────────────
 
 function MainApp() {
-  const containers       = useStore(s => s.containers);
+  const containers         = useStore(s => s.containers);
   const clearAllContainers = useStore(s => s.clearAllContainers);
   const mergeAutoTracking  = useStore(s => s.mergeAutoTracking);
   const lastAutoTrackAt    = useStore(s => s.lastAutoTrackAt);
   const sessions           = useStore(s => s.sessions);
+  const loadFromSupabase   = useStore(s => s.loadFromSupabase);
+  const loaded             = useStore(s => s.loaded);
+  const setCurrentUser     = useStore(s => s.setCurrentUser);
 
-  const authUser  = useAuthStore(s => s.currentUser);
-  const logout    = useAuthStore(s => s.logout);
-  const isAdmin   = authUser?.role === 'admin';
+  const authProfile = useAuthStore(s => s.profile);
+  const logout      = useAuthStore(s => s.logout);
+  const isAdmin     = authProfile?.role === 'admin';
+
+  // Load containers from Supabase on mount
+  useEffect(() => { loadFromSupabase(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep currentUser in sync with auth profile
+  useEffect(() => {
+    if (authProfile?.name) setCurrentUser(authProfile.name);
+  }, [authProfile?.name]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showUpload,      setShowUpload]      = useState(false);
   const [showSettings,    setShowSettings]    = useState(false);
@@ -192,6 +197,15 @@ function MainApp() {
   }
 
   if (showHelp) return <HelpPage onBack={() => setShowHelp(false)} />;
+
+  if (!loaded) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: '#070c1a' }}>
+        <RefreshCw size={20} className="animate-spin" style={{ color: '#67e8f9' }} />
+        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading container data…</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: '#070c1a' }}>
@@ -291,10 +305,10 @@ function MainApp() {
               style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold uppercase"
                 style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', color: 'white' }}>
-                {authUser?.name.charAt(0) ?? '?'}
+                {authProfile?.name.charAt(0) ?? '?'}
               </div>
               <div className="hidden sm:block">
-                <p className="text-xs font-medium text-white">{authUser?.name}</p>
+                <p className="text-xs font-medium text-white">{authProfile?.name}</p>
                 {isAdmin && <p className="text-xs" style={{ color: '#a78bfa' }}>Admin</p>}
               </div>
               <button onClick={handleLogout} title="Sign out"

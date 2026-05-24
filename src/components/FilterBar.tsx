@@ -29,13 +29,14 @@ export function FilterBar({ filters, onChange }: Props) {
   const carriers     = [...new Set(containers.map(c => c.carrier).filter(Boolean))].sort();
   const customers    = [...new Set(containers.map(c => c.customer).filter(Boolean))].sort();
   const destinations = [...new Set(containers.map(c => c.destinationPort).filter(Boolean))].sort();
+  const uploaders    = [...new Set(containers.map(c => c.uploadedBy).filter(Boolean))].sort();
 
   function set<K extends keyof FilterState>(key: K, value: FilterState[K]) {
     onChange({ ...filters, [key]: value });
   }
 
   function clearAll() {
-    onChange({ carrier: '', customer: '', destination: '', status: '', priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '', autoTrackedOnly: false });
+    onChange({ carrier: '', customer: '', destination: '', status: '', priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '', autoTrackedOnly: false, uploadedBy: '' });
   }
 
   const activeCount = Object.values(filters).filter(Boolean).length;
@@ -99,6 +100,13 @@ export function FilterBar({ filters, onChange }: Props) {
           <select value={filters.destination} onChange={e => set('destination', e.target.value)} style={DARK_SELECT}>
             <option value="">All Destinations</option>
             {destinations.map(d => <option key={d}>{d}</option>)}
+          </select>
+        )}
+
+        {uploaders.length > 1 && (
+          <select value={filters.uploadedBy} onChange={e => set('uploadedBy', e.target.value)} style={DARK_SELECT}>
+            <option value="">All Uploads</option>
+            {uploaders.map(u => <option key={u}>{u}</option>)}
           </select>
         )}
 
