@@ -111,25 +111,57 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   async setupAdmin(name, email, password) {
+    // Attempt to create the account
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { name, role: 'admin', status: 'active' } },
     });
+
     if (error) return error.message;
-    if (!data.user) return 'Sign-up succeeded but no user returned.';
 
-    // The trigger creates the profile — fetch it to confirm
-    await new Promise(r => setTimeout(r, 800)); // brief wait for trigger
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .single();
+    // If user is null the email already exists in Supabase — sign in instead
+    const userId = data.user?.id ?? null;
 
-    if (profile) {
-      set({ profile: profile as Profile, isFirstRun: false });
+    if (!userId) {
+      // Try signing in (account already registered)
+      const { data: si, error: siErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (siErr) {
+        return 'Account already exists — please sign in normally, or use a different email address.';
+      }
+      if (!si.user) return 'Could not sign in. Try refreshing the page.';
+
+      // Ensure the profile has admin/active status
+      await supabase.from('profiles')
+        .upsert({ id: si.user.id, email, name, role: 'admin', status: 'active' });
+
+      await new Promise(r => setTimeout(r, 600));
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', si.user.id).single();
+      if (profile) set({ profile: profile as Profile, isFirstRun: false });
+      return null;
     }
+
+    // Account created — if no session, email confirmation is required.
+    // Try to sign in immediately; if that fails, tell the user to disable it.
+    if (!data.session) {
+      const { data: si, error: siErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (siErr || !si.user) {
+        return 'Account created but email confirmation is required. In Supabase → Authentication → Providers → Email, turn off "Confirm email", then try again.';
+      }
+      await supabase.from('profiles')
+        .upsert({ id: si.user.id, email, name, role: 'admin', status: 'active' });
+      await new Promise(r => setTimeout(r, 600));
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', si.user.id).single();
+      if (profile) set({ profile: profile as Profile, isFirstRun: false });
+      return null;
+    }
+
+    // Normal path — trigger creates profile, wait briefly then fetch it
+    await new Promise(r => setTimeout(r, 800));
+    await supabase.from('profiles')
+      .upsert({ id: userId, email, name, role: 'admin', status: 'active' });
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (profile) set({ profile: profile as Profile, isFirstRun: false });
     return null;
   },
 
