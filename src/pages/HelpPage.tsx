@@ -13,6 +13,7 @@ import {
   RefreshCw,
   GitBranch,
   Package,
+  CheckCircle2,
 } from 'lucide-react';
 
 /* ─── Reusable helpers ─────────────────────────────────────────────────────── */
@@ -102,37 +103,45 @@ function ManualWorkflowDiagram() {
 }
 
 function AutoWorkflowDiagram() {
+  const boxes = [
+    { x: 20,  label: 'App',         sub: 'Sync containers',     color: '#2563eb', tc: '#fff', sc: '#93c5fd' },
+    { x: 200, label: 'GitHub',      sub: 'data/containers.json', color: '#1e293b', tc: '#fff', sc: '#94a3b8' },
+    { x: 380, label: 'Actions',     sub: 'Every 4 hours',        color: '#7c3aed', tc: '#fff', sc: '#c4b5fd' },
+    { x: 560, label: 'Carrier APIs',sub: 'Parallel (10 at once)',color: '#0891b2', tc: '#fff', sc: '#a5f3fc' },
+    { x: 740, label: 'Results',     sub: 'auto-tracking.json',   color: '#059669', tc: '#fff', sc: '#6ee7b7' },
+  ];
   return (
     <div className="overflow-x-auto">
-      <svg viewBox="0 0 900 160" className="w-full min-w-[600px]" style={{ height: 160 }}>
-        {/* Row 1 */}
-        {[
-          { x: 20,  y: 20, label: 'App', sub: 'Upload SAP data', color: '#2563eb', tc: '#fff', sc: '#93c5fd' },
-          { x: 200, y: 20, label: 'GitHub', sub: 'data/containers.json', color: '#1e293b', tc: '#fff', sc: '#94a3b8' },
-          { x: 380, y: 20, label: 'Actions', sub: 'Runs Wednesday 8AM', color: '#7c3aed', tc: '#fff', sc: '#c4b5fd' },
-          { x: 560, y: 20, label: 'Carrier APIs', sub: 'Maersk / Sinay etc.', color: '#0891b2', tc: '#fff', sc: '#a5f3fc' },
-          { x: 740, y: 20, label: 'Results', sub: 'auto-tracking.json', color: '#059669', tc: '#fff', sc: '#6ee7b7' },
-        ].map((b, i) => (
+      <svg viewBox="0 0 920 200" className="w-full min-w-[600px]" style={{ height: 200 }}>
+        {/* Scheduled flow */}
+        {boxes.map((b, i) => (
           <g key={i}>
-            <rect x={b.x} y={b.y} width={150} height={56} rx={10}
-              fill={b.color} stroke="transparent" />
-            <text x={b.x + 75} y={b.y + 24} textAnchor="middle" fontSize={12} fontWeight="700" fill={b.tc}>{b.label}</text>
-            <text x={b.x + 75} y={b.y + 42} textAnchor="middle" fontSize={10} fill={b.sc}>{b.sub}</text>
-            {i < 4 && (
+            <rect x={b.x} y={20} width={150} height={56} rx={10} fill={b.color} stroke="transparent" />
+            <text x={b.x + 75} y={44} textAnchor="middle" fontSize={12} fontWeight="700" fill={b.tc}>{b.label}</text>
+            <text x={b.x + 75} y={62} textAnchor="middle" fontSize={10} fill={b.sc}>{b.sub}</text>
+            {i < boxes.length - 1 && (
               <>
-                <line x1={b.x + 150} y1={b.y + 28} x2={b.x + 168} y2={b.y + 28} stroke="#94a3b8" strokeWidth={1.5} />
-                <polygon points={`${b.x + 168},${b.y + 23} ${b.x + 178},${b.y + 28} ${b.x + 168},${b.y + 33}`} fill="#94a3b8" />
+                <line x1={b.x + 150} y1={48} x2={b.x + 168} y2={48} stroke="#94a3b8" strokeWidth={1.5} />
+                <polygon points={`${b.x + 168},43 ${b.x + 178},48 ${b.x + 168},53`} fill="#94a3b8" />
               </>
             )}
           </g>
         ))}
-        {/* Down arrow from Results */}
-        <line x1={815} y1={76} x2={815} y2={100} stroke="#94a3b8" strokeWidth={1.5} />
-        <polygon points="810,100 815,110 820,100" fill="#94a3b8" />
-        {/* Bottom box */}
-        <rect x={665} y={110} width={300} height={40} rx={10} fill="#f0fdf4" stroke="#bbf7d0" strokeWidth={1.5} />
-        <text x={815} y={128} textAnchor="middle" fontSize={11} fontWeight="600" fill="#166534">App auto-loads results on next visit</text>
-        <text x={815} y={143} textAnchor="middle" fontSize={10} fill="#4ade80">Statuses &amp; priorities updated automatically</text>
+
+        {/* Down arrow from Results into app */}
+        <line x1={815} y1={76} x2={815} y2={106} stroke="#94a3b8" strokeWidth={1.5} />
+        <polygon points="810,106 815,116 820,106" fill="#94a3b8" />
+        <rect x={660} y={116} width={310} height={36} rx={10} fill="#f0fdf4" stroke="#bbf7d0" strokeWidth={1.5} />
+        <text x={815} y={130} textAnchor="middle" fontSize={11} fontWeight="600" fill="#166534">App auto-loads results every 4 hours</text>
+        <text x={815} y={145} textAnchor="middle" fontSize={10} fill="#16a34a">Statuses &amp; priorities updated silently in background</text>
+
+        {/* Check All Now manual path */}
+        <rect x={20} y={116} width={170} height={36} rx={10} fill="#0e7490" stroke="transparent" />
+        <text x={105} y={130} textAnchor="middle" fontSize={11} fontWeight="700" fill="#fff">Check All Now</text>
+        <text x={105} y={145} textAnchor="middle" fontSize={10} fill="#a5f3fc">Button in header</text>
+        <line x1={190} y1={134} x2={368} y2={48} stroke="#06b6d4" strokeWidth={1.5} strokeDasharray="5,3" />
+        <polygon points="364,43 374,48 364,53" fill="#06b6d4" />
+        <text x={270} y={100} textAnchor="middle" fontSize={9} fill="#0891b2" transform="rotate(-18,270,100)">triggers immediately</text>
       </svg>
     </div>
   );
@@ -231,7 +240,7 @@ const NAV_ITEMS = [
   { id: 'tracking',   label: '3. Check Tracking' },
   { id: 'decisions',  label: '4. Decision Logic' },
   { id: 'statuses',   label: '5. Statuses & Badges' },
-  { id: 'autotrack',  label: '6. Auto-Tracking' },
+  { id: 'autotrack',  label: '6. Auto-Tracking (every 4h)' },
   { id: 'export',     label: '7. Export Reports' },
 ];
 
@@ -287,11 +296,12 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
               <ManualWorkflowDiagram />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {[
-                { icon: Upload,    title: 'Upload',   desc: 'Drag & drop your SAP Excel/CSV export — the system parses it and sorts containers by operational risk automatically.' },
-                { icon: Table2,    title: 'Review',   desc: 'A colour-coded table shows every container with its priority, current SAP status, and the exact action needed.' },
-                { icon: Download,  title: 'Export',   desc: 'Generate a ready-to-use SAP update report in Excel — no more manually noting down what needs to change.' },
+                { icon: Upload,     title: 'Upload',        desc: 'Drag & drop your SAP Excel/CSV export — the system parses it and sorts containers by operational risk automatically.' },
+                { icon: Table2,     title: 'Review',        desc: 'A colour-coded table shows every container with its priority, current SAP status, and the exact action needed.' },
+                { icon: RefreshCw,  title: 'Check All Now', desc: 'One click queries all carrier APIs in parallel and updates every container automatically — no individual checks needed.' },
+                { icon: Download,   title: 'Export',        desc: 'Generate a ready-to-use SAP update report in Excel — no more manually noting down what needs to change.' },
               ].map(card => (
                 <div key={card.title} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                   <div className="p-2 bg-blue-50 rounded-lg w-fit mb-3">
@@ -561,9 +571,29 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
 
           {/* ── Auto-tracking ── */}
           <Section id="autotrack" title="6. Automated Tracking (GitHub Actions)">
-            <p className="text-slate-600 mb-5">
-              Once configured, the system automatically queries carrier APIs every Wednesday and updates container statuses — with no manual checking required for supported carriers.
+            <p className="text-slate-600 mb-4 leading-relaxed">
+              Once configured, the system queries all carrier APIs <strong>every 4 hours</strong> in parallel using GitHub Actions — with no manual checking required for supported carriers. Results are silently merged into the app each time the page is open.
             </p>
+
+            {/* New feature callouts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4">
+                <p className="font-semibold text-cyan-800 text-sm flex items-center gap-2 mb-1">
+                  <RefreshCw className="w-4 h-4" /> Check All Now — manual trigger
+                </p>
+                <p className="text-xs text-cyan-700">
+                  The <strong>cyan "Check All Now" button</strong> in the header triggers an immediate GitHub Actions run that queries all APIs in parallel (up to 10 at once) and updates every container in 2–4 minutes. A spinner and status banner keep you informed while it runs.
+                </p>
+              </div>
+              <div className="bg-violet-50 border border-violet-200 rounded-xl p-4">
+                <p className="font-semibold text-violet-800 text-sm flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4" /> Background auto-refresh — every 4 hours
+                </p>
+                <p className="text-xs text-violet-700">
+                  While the app tab is open, it silently fetches the latest results from GitHub every 4 hours. If the scheduled workflow has run since your last visit, statuses are merged automatically — no button needed.
+                </p>
+              </div>
+            </div>
 
             <div className="mb-6">
               <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Automated tracking pipeline</p>
@@ -575,34 +605,38 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
                 <p className="font-semibold text-slate-700 text-sm mb-3">Supported carrier APIs</p>
                 <div className="space-y-1.5">
                   {[
-                    { carrier: 'Maersk / ANL',       api: 'Maersk Track v2',    free: true },
-                    { carrier: 'CMA CGM / ANL',      api: 'CMA CGM DCSA API',   free: true },
-                    { carrier: 'Hapag-Lloyd',         api: 'HL DCSA API',        free: true },
-                    { carrier: 'MSC',                 api: 'MSC DCSA API',       free: true },
-                    { carrier: '170+ others',         api: 'Sinay universal API',free: true },
+                    { carrier: 'Maersk / ANL',  api: 'Maersk Track v2',     limit: '~25 calls/day' },
+                    { carrier: 'CMA CGM',        api: 'CMA CGM DCSA API',    limit: '~200 calls/day' },
+                    { carrier: 'Hapag-Lloyd',    api: 'HL DCSA API',         limit: '~100 calls/day' },
+                    { carrier: 'MSC',            api: 'MSC DCSA API',        limit: '~200 calls/day' },
+                    { carrier: '170+ carriers',  api: 'Sinay universal API', limit: '~500 calls/day' },
                   ].map(row => (
-                    <div key={row.carrier} className="flex items-center justify-between text-xs">
-                      <span className="text-slate-700 font-medium">{row.carrier}</span>
-                      <span className="text-slate-400">{row.api}</span>
-                      <span className="text-green-600 font-semibold">Free</span>
+                    <div key={row.carrier} className="flex items-center justify-between text-xs gap-2">
+                      <span className="text-slate-700 font-medium w-28 shrink-0">{row.carrier}</span>
+                      <span className="text-slate-400 flex-1">{row.api}</span>
+                      <span className="text-green-600 font-semibold whitespace-nowrap">{row.limit}</span>
                     </div>
                   ))}
                 </div>
+                <p className="text-[10px] text-slate-400 mt-3">
+                  At 4-hour intervals (6 runs/day × ~20 containers), usage stays well within free tier limits.
+                  Containers checked in the last 3 hours are automatically skipped to preserve quota.
+                </p>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                <p className="font-semibold text-slate-700 text-sm mb-3">Setup checklist</p>
+                <p className="font-semibold text-slate-700 text-sm mb-3">One-time setup checklist</p>
                 <div className="space-y-2 text-xs text-slate-600">
                   {[
-                    ['Get a GitHub PAT', 'github.com/settings/tokens → repo scope'],
-                    ['Register at Sinay', 'app.sinay.ai → free API key (covers all carriers)'],
-                    ['Add SINAY_API_KEY secret', 'repo → Settings → Secrets → Actions'],
-                    ['Sync containers from app', '⚡ Auto-Track button → Step 1 → Sync'],
-                    ['Run workflow', 'GitHub → Actions → Auto-Track → Run workflow'],
-                    ['Load results', '⚡ Auto-Track button → Step 4 → Load Latest Results'],
+                    ['Get a GitHub PAT',        'github.com/settings/tokens → "repo" scope'],
+                    ['Register at Sinay',        'app.sinay.ai → free API key (170+ carriers)'],
+                    ['Add SINAY_API_KEY secret', 'Repo → Settings → Secrets → Actions'],
+                    ['Sync containers',          '⚡ Auto-Track → Step 1 → Sync Now'],
+                    ['Test with Check All Now',  'Click the cyan button in the header — wait 2–4 min'],
+                    ['Results load automatically','App refreshes silently every 4 h while open'],
                   ].map(([step, detail], i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <span className="w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0 text-violet-500" />
                       <div>
                         <p className="font-medium text-slate-700">{step}</p>
                         <p className="text-slate-400">{detail}</p>
@@ -614,7 +648,7 @@ export function HelpPage({ onBack }: { onBack: () => void }) {
             </div>
 
             <InfoBox icon={Zap} title="Quickest path to automation" color="violet">
-              Register at <a href="https://app.sinay.ai" className="underline font-medium" target="_blank" rel="noopener noreferrer">app.sinay.ai</a> — you'll have a free API key in under 2 minutes. Add it as <code className="bg-violet-100 px-1 rounded">SINAY_API_KEY</code> in your GitHub repo secrets. This single key covers all 170+ carriers including ONE, Evergreen, Yang Ming, COSCO, and more.
+              Register at <a href="https://app.sinay.ai" className="underline font-medium" target="_blank" rel="noopener noreferrer">app.sinay.ai</a> — you'll get a free API key in under 2 minutes. Add it as <code className="bg-violet-100 px-1 rounded">SINAY_API_KEY</code> in your GitHub repo secrets. One key covers all 170+ carriers including ONE, Evergreen, Yang Ming, COSCO, PIL, and more. Then click <strong>Check All Now</strong> to see it work immediately.
             </InfoBox>
           </Section>
 
