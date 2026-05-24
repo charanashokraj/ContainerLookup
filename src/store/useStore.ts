@@ -9,10 +9,14 @@ import type {
 import { loadState, saveState } from '../lib/storage';
 import { v4 as uuid } from '../lib/uuid';
 import { computeDecision, computePriority, sortContainers } from '../lib/decisionEngine';
+import type { AutoTrackingResult } from '../lib/githubSync';
 
 interface Store extends AppState {
+  lastAutoTrackAt: string | null;
+  autoTrackedCount: number;
   // Actions
   setCurrentUser: (name: string) => void;
+  mergeAutoTracking: (results: Record<string, AutoTrackingResult>, updatedAt: string | null, trackedCount: number) => void;
   importContainers: (records: ContainerRecord[], filename: string) => void;
   clearAllContainers: () => void;
   updateCarrierTracking: (
@@ -42,6 +46,8 @@ function persist(state: AppState) {
 
 export const useStore = create<Store>((set, get) => ({
   ...initial,
+  lastAutoTrackAt: null,
+  autoTrackedCount: 0,
 
   setCurrentUser(name) {
     set({ currentUser: name });
@@ -176,6 +182,50 @@ export const useStore = create<Store>((set, get) => ({
     set((s) => ({
       containers: s.containers.map((c) =>
         c.id === id ? { ...c, assignedTo } : c
+      ),
+    }));
+    persist(get());
+  },
+
+  mergeAutoTracking(results, updatedAt, trackedCount) {
+    set((s) => ({
+      lastAutoTrackAt: updatedAt,
+      autoTrackedCount: trackedCount,
+      containers: sortContainers(
+        s.containers.map((c) => {
+          const result = results[c.id];
+          if (!result || !result.autoTracked) return c;
+
+          const mergedEvents: CarrierEvents = {
+            ...c.carrierEvents,
+            dischargeDate: result.dischargeDate ?? c.carrierEvents.dischargeDate,
+            releaseDate: result.releaseDate ?? c.carrierEvents.releaseDate,
+            emptyReturnDate: result.emptyReturnDate ?? c.carrierEvents.emptyReturnDate,
+            currentStatus: result.currentStatus ?? c.carrierEvents.currentStatus,
+            lastEventDescription: result.lastEventDescription ?? c.carrierEvents.lastEventDescription,
+            lastEventDate: result.lastEventDate ?? c.carrierEvents.lastEventDate,
+            eta: result.eta ?? c.carrierEvents.eta,
+          };
+
+          const updated: ContainerRecord = {
+            ...c,
+            carrierEta: result.eta ?? c.carrierEta,
+            carrierEvents: mergedEvents,
+            trackingCheckedAt: result.checkedAt,
+            trackingCheckedBy: 'Auto-Tracker',
+            trackingSource: result.source ?? 'GitHub Actions',
+          };
+
+          const decision = computeDecision(updated);
+          return {
+            ...updated,
+            reviewStatus: decision.reviewStatus,
+            suggestedAction: decision.suggestedAction,
+            suggestedEventDate: decision.suggestedEventDate,
+            reason: decision.reason,
+            priority: computePriority({ ...updated, ...decision }),
+          };
+        })
       ),
     }));
     persist(get());
