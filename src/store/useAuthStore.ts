@@ -24,8 +24,8 @@ interface AuthStore {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function loadOrEnsureProfile(user: User): Promise<Profile | null> {
-  // Try reading the profile first
-  const { data } = await supabase
+  // Try reading the profile
+  const { data, error: readErr } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
@@ -33,22 +33,42 @@ async function loadOrEnsureProfile(user: User): Promise<Profile | null> {
 
   if (data) return data as Profile;
 
+  // If we got a real DB error (not just "no rows"), log it for debugging
+  if (readErr && readErr.code !== 'PGRST116') {
+    console.warn('[Auth] Profile read error:', readErr.message);
+  }
+
   // Profile missing (trigger may have failed) — create it from auth metadata
   const meta = user.user_metadata ?? {};
   const fallback = {
     id:     user.id,
     email:  user.email ?? '',
-    name:   meta.name   ?? user.email?.split('@')[0] ?? '',
-    role:   meta.role   ?? 'user',
-    status: meta.status ?? 'pending',
+    name:   meta.name   ?? user.email?.split('@')[0] ?? 'User',
+    role:   (meta.role   as string) ?? 'user',
+    status: (meta.status as string) ?? 'pending',
   };
-  const { data: created } = await supabase
+
+  // INSERT first; if the row already exists (concurrent trigger), fall back to SELECT
+  const { data: inserted, error: insertErr } = await supabase
     .from('profiles')
-    .upsert(fallback)
+    .insert(fallback)
     .select()
     .single();
 
-  return (created as Profile) ?? null;
+  if (inserted) return inserted as Profile;
+
+  // Row already existed but we couldn't read it first time — retry SELECT
+  if (insertErr?.code === '23505') {
+    const { data: retry } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    return (retry as Profile) ?? null;
+  }
+
+  console.warn('[Auth] Could not create profile:', insertErr?.message);
+  return null;
 }
 
 // ── Store ─────────────────────────────────────────────────────────────────────
@@ -115,14 +135,25 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   // ── First admin setup ─────────────────────────────────────────────────────
   async setupAdmin(name, email, password) {
-    // Prevent creating a second admin via this form
+    // If an admin already exists, try signing in with the provided credentials instead of blocking
     const { count } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('role', 'admin')
       .eq('status', 'active');
+
     if ((count ?? 0) > 0) {
-      return 'An admin account already exists. Please sign in instead.';
+      // Admin exists — try to sign in the user directly
+      const { data: si, error: siErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (siErr) return 'An admin account already exists. Please sign in with your existing credentials.';
+      if (!si?.user) return 'Sign-in failed. Try the Sign In page instead.';
+      // Ensure their profile has admin/active status (in case it was incomplete)
+      await supabase.from('profiles')
+        .upsert({ id: si.user.id, email: si.user.email ?? email, name, role: 'admin', status: 'active' });
+      await new Promise(r => setTimeout(r, 600));
+      const p = await loadOrEnsureProfile(si.user);
+      if (p) set({ profile: { ...p, status: 'active', role: 'admin' } as Profile });
+      return null;
     }
 
     // Try creating the account
