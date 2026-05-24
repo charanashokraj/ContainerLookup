@@ -1,20 +1,20 @@
 {
-  "updatedAt": "2026-05-24T11:04:33.320760+00:00",
+  "updatedAt": "2026-05-24T11:12:58.735486+00:00",
   "containerCount": 2,
   "trackedCount": 0,
   "skippedCount": 0,
   "results": {
-    "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-05-24T11:04:33.309224+00:00",
-      "error": "Not found via available APIs for carrier 'MAERSK'"
-    },
     "958c586f-9641-4d84-8d8b-671ccfe9497b": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-05-24T11:04:33.320579+00:00",
+      "checkedAt": "2026-05-24T11:12:58.730224+00:00",
       "error": "Not found via available APIs for carrier 'CMA-CGM'"
+    },
+    "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-05-24T11:12:58.735231+00:00",
+      "error": "Not found via available APIs for carrier 'MAERSK'"
     }
   }
 }
