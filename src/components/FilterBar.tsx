@@ -1,4 +1,4 @@
-import { Search, X } from 'lucide-react';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 import type { FilterState, Priority, ReviewStatus } from '../types';
 import { useStore } from '../store/useStore';
 
@@ -7,52 +7,61 @@ interface Props {
   onChange: (f: FilterState) => void;
 }
 
-export function FilterBar({ filters, onChange }: Props) {
-  const containers = useStore((s) => s.containers);
+const DARK_SELECT: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  color: 'white',
+  borderRadius: 8,
+  padding: '7px 10px',
+  fontSize: 13,
+  outline: 'none',
+  cursor: 'pointer',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 8px center',
+  paddingRight: 28,
+};
 
-  const carriers = [...new Set(containers.map((c) => c.carrier).filter(Boolean))].sort();
-  const customers = [...new Set(containers.map((c) => c.customer).filter(Boolean))].sort();
-  const destinations = [...new Set(containers.map((c) => c.destinationPort).filter(Boolean))].sort();
+export function FilterBar({ filters, onChange }: Props) {
+  const containers   = useStore(s => s.containers);
+  const carriers     = [...new Set(containers.map(c => c.carrier).filter(Boolean))].sort();
+  const customers    = [...new Set(containers.map(c => c.customer).filter(Boolean))].sort();
+  const destinations = [...new Set(containers.map(c => c.destinationPort).filter(Boolean))].sort();
 
   function set<K extends keyof FilterState>(key: K, value: FilterState[K]) {
     onChange({ ...filters, [key]: value });
   }
 
   function clearAll() {
-    onChange({
-      carrier: '',
-      customer: '',
-      destination: '',
-      status: '',
-      priority: '',
-      suggestedAction: '',
-      search: '',
-      etaFrom: '',
-      etaTo: '',
-    });
+    onChange({ carrier: '', customer: '', destination: '', status: '', priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '' });
   }
 
-  const hasFilters = Object.values(filters).some(Boolean);
+  const activeCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4 space-y-3">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-48">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+    <div className="rounded-2xl mb-4 p-4"
+      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
+      <div className="flex items-center gap-2.5 flex-wrap">
+
+        {/* Search */}
+        <div className="relative flex-1 min-w-52">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.3)' }} />
           <input
             type="text"
             placeholder="Search container, booking, customer…"
             value={filters.search}
-            onChange={(e) => set('search', e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={e => set('search', e.target.value)}
+            className="dark-input w-full pl-8 pr-4 py-2 rounded-lg text-sm text-white"
           />
         </div>
 
+        {/* Status */}
         <select
           value={filters.status}
-          onChange={(e) => set('status', e.target.value as ReviewStatus | '')}
-          className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
+          onChange={e => set('status', e.target.value as ReviewStatus | '')}
+          style={DARK_SELECT}>
           <option value="">All Statuses</option>
           <option>Action Required</option>
           <option>Pending Review</option>
@@ -60,11 +69,11 @@ export function FilterBar({ filters, onChange }: Props) {
           <option>Completed</option>
         </select>
 
+        {/* Priority */}
         <select
           value={filters.priority}
-          onChange={(e) => set('priority', e.target.value as Priority | '')}
-          className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
+          onChange={e => set('priority', e.target.value as Priority | '')}
+          style={DARK_SELECT}>
           <option value="">All Priorities</option>
           <option>High</option>
           <option>Medium</option>
@@ -72,46 +81,45 @@ export function FilterBar({ filters, onChange }: Props) {
         </select>
 
         {carriers.length > 0 && (
-          <select
-            value={filters.carrier}
-            onChange={(e) => set('carrier', e.target.value)}
-            className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <select value={filters.carrier} onChange={e => set('carrier', e.target.value)} style={DARK_SELECT}>
             <option value="">All Carriers</option>
-            {carriers.map((c) => <option key={c}>{c}</option>)}
+            {carriers.map(c => <option key={c}>{c}</option>)}
           </select>
         )}
 
         {customers.length > 0 && (
-          <select
-            value={filters.customer}
-            onChange={(e) => set('customer', e.target.value)}
-            className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <select value={filters.customer} onChange={e => set('customer', e.target.value)} style={DARK_SELECT}>
             <option value="">All Customers</option>
-            {customers.map((c) => <option key={c}>{c}</option>)}
+            {customers.map(c => <option key={c}>{c}</option>)}
           </select>
         )}
 
         {destinations.length > 0 && (
-          <select
-            value={filters.destination}
-            onChange={(e) => set('destination', e.target.value)}
-            className="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <select value={filters.destination} onChange={e => set('destination', e.target.value)} style={DARK_SELECT}>
             <option value="">All Destinations</option>
-            {destinations.map((d) => <option key={d}>{d}</option>)}
+            {destinations.map(d => <option key={d}>{d}</option>)}
           </select>
         )}
 
-        {hasFilters && (
-          <button
-            onClick={clearAll}
-            className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 transition-colors"
-          >
-            <X className="w-4 h-4" /> Clear
-          </button>
-        )}
+        {/* Filter indicator + clear */}
+        <div className="flex items-center gap-2 ml-auto">
+          {activeCount > 0 && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+              style={{ background: 'rgba(6,182,212,0.15)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.25)' }}>
+              {activeCount} active
+            </span>
+          )}
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <SlidersHorizontal size={12} /> Filters
+          </div>
+          {activeCount > 0 && (
+            <button onClick={clearAll}
+              className="flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg"
+              style={{ color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+              <X size={11} /> Clear
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

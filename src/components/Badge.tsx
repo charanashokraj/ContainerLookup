@@ -1,27 +1,28 @@
-import { cn } from '../lib/cn';
 import type { Priority, ReviewStatus } from '../types';
 
-const priorityStyles: Record<Priority, string> = {
-  High: 'bg-red-100 text-red-800 border border-red-200',
-  Medium: 'bg-amber-100 text-amber-800 border border-amber-200',
-  Low: 'bg-green-100 text-green-800 border border-green-200',
+const PRIORITY: Record<Priority, React.CSSProperties> = {
+  High:   { background: 'rgba(239,68,68,0.12)',  border: '1px solid rgba(239,68,68,0.3)',  color: '#f87171' },
+  Medium: { background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' },
+  Low:    { background: 'rgba(34,197,94,0.10)',  border: '1px solid rgba(34,197,94,0.25)', color: '#4ade80' },
 };
 
-const statusStyles: Record<ReviewStatus, string> = {
-  'Action Required': 'bg-orange-100 text-orange-800 border border-orange-200',
-  'Pending Review': 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-  'No Update Required': 'bg-blue-100 text-blue-800 border border-blue-200',
-  Completed: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+const STATUS: Record<ReviewStatus, React.CSSProperties> = {
+  'Action Required':    { background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' },
+  'Pending Review':     { background: 'rgba(234,179,8,0.12)',  border: '1px solid rgba(234,179,8,0.3)',  color: '#facc15' },
+  'No Update Required': { background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#60a5fa' },
+  'Completed':          { background: 'rgba(34,197,94,0.12)',  border: '1px solid rgba(34,197,94,0.3)',  color: '#4ade80' },
+};
+
+const DOT: Record<ReviewStatus, string> = {
+  'Action Required':    '#fb923c',
+  'Pending Review':     '#facc15',
+  'No Update Required': '#60a5fa',
+  'Completed':          '#4ade80',
 };
 
 export function PriorityBadge({ priority }: { priority: Priority }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold',
-        priorityStyles[priority]
-      )}
-    >
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold" style={PRIORITY[priority]}>
       {priority}
     </span>
   );
@@ -29,12 +30,8 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
 
 export function StatusBadge({ status }: { status: ReviewStatus }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-        statusStyles[status]
-      )}
-    >
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap" style={STATUS[status]}>
+      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: DOT[status] }} />
       {status}
     </span>
   );
