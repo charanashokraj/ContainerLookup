@@ -1,41 +1,48 @@
 """
 Automated Container Tracking Script
-Reads data/containers.json → queries carrier APIs → writes public/auto-tracking.json.
+Reads data/containers.json → queries carrier APIs IN PARALLEL → writes public/auto-tracking.json.
 
-API support matrix:
-  Carrier               | API Used              | Secret(s) needed
-  ----------------------|-----------------------|----------------------------------
-  Maersk / ANL          | Maersk Track v2 API   | MAERSK_CLIENT_ID + MAERSK_CLIENT_SECRET
-  CMA CGM / ANL         | CMA CGM DCSA API      | CMACGM_API_KEY
-  Hapag-Lloyd           | HL DCSA API           | HLAG_CLIENT_ID + HLAG_CLIENT_SECRET
-  MSC                   | MSC DCSA API          | MSC_API_KEY
-  ALL others (fallback) | Sinay universal API   | SINAY_API_KEY  (170+ carriers, free tier)
+Rate-limit strategy (4-hour polling):
+  - Containers checked in the last 3h are SKIPPED (unless FORCE_ALL=true)
+  - Completed containers are always skipped
+  - All carrier API calls run in parallel (ThreadPoolExecutor)
+
+API support:
+  Carrier               | Secret(s)
+  ----------------------|------------------------------------------
+  Maersk / ANL          | MAERSK_CLIENT_ID + MAERSK_CLIENT_SECRET
+  CMA CGM / ANL         | CMACGM_API_KEY
+  Hapag-Lloyd           | HLAG_CLIENT_ID + HLAG_CLIENT_SECRET
+  MSC                   | MSC_API_KEY
+  ALL others (170+)     | SINAY_API_KEY  (one key covers everything)
 """
 
 import json
 import os
 import sys
-import time
-from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import requests
 
-# ── DCSA equipment event codes → standardized bucket ──────────────────────────
-DCSA_DISCHARGE_CODES = {"DISC"}          # discharged from vessel
-DCSA_RELEASE_CODES   = {"GOUT"}          # gate out full (customer picked up)
-DCSA_EMPTY_CODES     = {"GTIN"}          # gate in empty (returned)
+# ── Config ─────────────────────────────────────────────────────────────────────
+SKIP_IF_CHECKED_WITHIN_HOURS = 3      # skip containers checked less than 3h ago
+MAX_PARALLEL_WORKERS = 10             # parallel API calls
+REQUEST_TIMEOUT = 30
 
-# ── Keyword fallback (non-DCSA carriers) ──────────────────────────────────────
-DISCHARGE_KW  = ["discharged", "import discharged", "discharged at pod", "unloaded",
-                  "vessel discharged", "arrival at pod", "port arrival", "disc"]
-RELEASE_KW    = ["gate out", "full container gate out", "picked up", "import release",
-                  "container released", "full out", "delivery out", "gout"]
+# ── DCSA event code tables ─────────────────────────────────────────────────────
+DISCHARGE_CODES  = {"DISC"}
+RELEASE_CODES    = {"GOUT"}
+EMPTY_CODES      = {"GTIN"}
+
+DISCHARGE_KW  = ["discharged", "import discharged", "discharged at pod",
+                  "unloaded", "vessel discharged", "arrival at pod", "disc"]
+RELEASE_KW    = ["gate out", "full container gate out", "picked up",
+                  "import release", "container released", "full out", "gout"]
 EMPTY_KW      = ["empty return", "empty returned", "empty container returned",
                   "gate in empty", "empty in", "return empty", "gtin"]
 AMBIGUOUS_KW  = ["available for delivery", "available", "customs cleared"]
 
-
-# ── Shared event normalizer (handles DCSA + keyword) ──────────────────────────
 
 def normalize_events(events: list) -> dict:
     result = {
@@ -44,22 +51,20 @@ def normalize_events(events: list) -> dict:
         "lastEventDate": None, "eta": None,
     }
     for ev in events:
-        desc   = (ev.get("description") or ev.get("eventName") or
-                  ev.get("equipmentEventTypeCode") or "").lower()
-        code   = (ev.get("equipmentEventTypeCode") or "").upper()
-        raw_dt = ev.get("eventDateTime") or ev.get("date") or ev.get("eventDate") or ""
-        date   = raw_dt[:10] if raw_dt else ""
+        desc = (ev.get("description") or ev.get("eventName") or
+                ev.get("equipmentEventTypeCode") or "").lower()
+        code = (ev.get("equipmentEventTypeCode") or "").upper()
+        raw  = ev.get("eventDateTime") or ev.get("date") or ev.get("eventDate") or ""
+        date = raw[:10] if raw else ""
 
         if any(a in desc for a in AMBIGUOUS_KW):
             continue
-
-        is_disc  = code in DCSA_DISCHARGE_CODES or any(k in desc for k in DISCHARGE_KW)
-        is_rel   = code in DCSA_RELEASE_CODES   or any(k in desc for k in RELEASE_KW)
-        is_empty = code in DCSA_EMPTY_CODES      or any(k in desc for k in EMPTY_KW)
-
-        if is_disc  and not result["dischargeDate"]:  result["dischargeDate"]  = date
-        if is_rel   and not result["releaseDate"]:    result["releaseDate"]    = date
-        if is_empty and not result["emptyReturnDate"]: result["emptyReturnDate"] = date
+        if (code in DISCHARGE_CODES or any(k in desc for k in DISCHARGE_KW)) and not result["dischargeDate"]:
+            result["dischargeDate"] = date
+        if (code in RELEASE_CODES or any(k in desc for k in RELEASE_KW)) and not result["releaseDate"]:
+            result["releaseDate"] = date
+        if (code in EMPTY_CODES or any(k in desc for k in EMPTY_KW)) and not result["emptyReturnDate"]:
+            result["emptyReturnDate"] = date
 
     if events:
         last = events[-1]
@@ -72,18 +77,14 @@ def normalize_events(events: list) -> dict:
     return result
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MAERSK  (OAuth2, api.maersk.com)
-# Register: https://developer.maersk.com  → free tier
-# ──────────────────────────────────────────────────────────────────────────────
+# ── Maersk ─────────────────────────────────────────────────────────────────────
 
-def _maersk_token(client_id, secret):
+def _maersk_token(cid, secret):
     try:
         r = requests.post(
             "https://api.maersk.com/oauth2/access_token",
-            data={"grant_type": "client_credentials",
-                  "client_id": client_id, "client_secret": secret},
-            timeout=30)
+            data={"grant_type": "client_credentials", "client_id": cid, "client_secret": secret},
+            timeout=REQUEST_TIMEOUT)
         return r.json().get("access_token") if r.ok else None
     except Exception as e:
         print(f"  [Maersk] token error: {e}", file=sys.stderr)
@@ -95,10 +96,9 @@ def _track_maersk(booking, container, token):
         if not v: continue
         try:
             r = requests.get("https://api.maersk.com/track/v2/shipments",
-                             headers=hdrs, params={k: v}, timeout=30)
+                             headers=hdrs, params={k: v}, timeout=REQUEST_TIMEOUT)
             if r.ok:
-                data = r.json()
-                ships = data.get("shipments", [data])
+                ships = r.json().get("shipments", [r.json()])
                 events, eta = [], None
                 for s in ships:
                     events += s.get("transportEvents", s.get("events", []))
@@ -112,25 +112,18 @@ def _track_maersk(booking, container, token):
     return None
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# CMA CGM / ANL  (DCSA v2, api-portal.cma-cgm.com)
-# Register: https://api-portal.cma-cgm.com → free trial → Visibility API
-# Secret:   CMACGM_API_KEY
-# ──────────────────────────────────────────────────────────────────────────────
-
-CMACGM_BASE = "https://apis.cma-cgm.net/visibility/v2"
+# ── CMA CGM / ANL ──────────────────────────────────────────────────────────────
 
 def _track_cmacgm(booking, container, api_key):
     hdrs = {"Ocp-Apim-Subscription-Key": api_key, "Accept": "application/json"}
     for k, v in [("carrierBookingReference", booking), ("equipmentReference", container)]:
         if not v: continue
         try:
-            r = requests.get(f"{CMACGM_BASE}/events", headers=hdrs,
-                             params={k: v, "limit": 100}, timeout=30)
+            r = requests.get("https://apis.cma-cgm.net/visibility/v2/events",
+                             headers=hdrs, params={k: v, "limit": 100}, timeout=REQUEST_TIMEOUT)
             if r.ok:
                 events = r.json().get("events", [])
                 norm = normalize_events(events)
-                # Extract ETA from transport events
                 for ev in events:
                     if ev.get("transportEventTypeCode") == "ARRI":
                         raw = ev.get("eventDateTime", "")
@@ -141,19 +134,14 @@ def _track_cmacgm(booking, container, api_key):
     return None
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# HAPAG-LLOYD  (DCSA v2, api.hlag.com)
-# Register: https://api-portal.hlag.com  → free sandbox → subscribe to Track & Trace
-# Secrets:  HLAG_CLIENT_ID + HLAG_CLIENT_SECRET
-# ──────────────────────────────────────────────────────────────────────────────
+# ── Hapag-Lloyd ────────────────────────────────────────────────────────────────
 
-def _hlag_token(client_id, secret):
+def _hlag_token(cid, secret):
     try:
         r = requests.post(
             "https://api.hlag.com/hlag/auth/v1/token",
-            data={"grant_type": "client_credentials",
-                  "client_id": client_id, "client_secret": secret},
-            timeout=30)
+            data={"grant_type": "client_credentials", "client_id": cid, "client_secret": secret},
+            timeout=REQUEST_TIMEOUT)
         return r.json().get("access_token") if r.ok else None
     except Exception as e:
         print(f"  [HL] token error: {e}", file=sys.stderr)
@@ -165,7 +153,7 @@ def _track_hlag(booking, container, token):
         if not v: continue
         try:
             r = requests.get("https://api.hlag.com/hlag/v2/events",
-                             headers=hdrs, params={k: v, "limit": 100}, timeout=30)
+                             headers=hdrs, params={k: v, "limit": 100}, timeout=REQUEST_TIMEOUT)
             if r.ok:
                 events = r.json().get("events", [])
                 norm = normalize_events(events)
@@ -180,61 +168,39 @@ def _track_hlag(booking, container, token):
     return None
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# MSC  (DCSA v2, developerportal.msc.com)
-# Register: https://developerportal.msc.com → DPO-DCSATrackAndTrace-API-V2
-# Secret:   MSC_API_KEY  (Ocp-Apim-Subscription-Key header)
-# ──────────────────────────────────────────────────────────────────────────────
-
-MSC_BASE = "https://api.msc.com/dpo/v2"
+# ── MSC ────────────────────────────────────────────────────────────────────────
 
 def _track_msc(booking, container, api_key):
     hdrs = {"Ocp-Apim-Subscription-Key": api_key, "Accept": "application/json"}
     for k, v in [("carrierBookingReference", booking), ("equipmentReference", container)]:
         if not v: continue
         try:
-            r = requests.get(f"{MSC_BASE}/events", headers=hdrs,
-                             params={k: v, "limit": 100}, timeout=30)
+            r = requests.get("https://api.msc.com/dpo/v2/events",
+                             headers=hdrs, params={k: v, "limit": 100}, timeout=REQUEST_TIMEOUT)
             if r.ok:
-                events = r.json().get("events", [])
-                return normalize_events(events)
+                return normalize_events(r.json().get("events", []))
         except Exception as e:
             print(f"  [MSC] {e}", file=sys.stderr)
     return None
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# SINAY  (Universal – 170+ carriers)
-# Register: https://app.sinay.ai  → free API key in minutes
-# Secret:   SINAY_API_KEY
-# Covers:   ONE, Evergreen, Yang Ming, COSCO, ZIM, PIL, HMM, and 160+ more
-# ──────────────────────────────────────────────────────────────────────────────
-
-SINAY_BASE = "https://api-dev.sinay.ai/container-tracking/api/v2"
+# ── Sinay (universal, 170+ carriers) ──────────────────────────────────────────
 
 def _track_sinay(booking, container, api_key):
     hdrs = {"API_KEY": api_key, "Accept": "application/json"}
-    # Sinay works best with container number; try booking as BL fallback
     for stype, val in [("CT", container), ("BL", booking)]:
         if not val: continue
         try:
-            r = requests.get(f"{SINAY_BASE}/shipment",
-                             headers=hdrs,
-                             params={"shipmentType": stype, "number": val},
-                             timeout=30)
+            r = requests.get("https://api-dev.sinay.ai/container-tracking/api/v2/shipment",
+                             headers=hdrs, params={"shipmentType": stype, "number": val},
+                             timeout=REQUEST_TIMEOUT)
             if r.ok:
                 data = r.json()
-                # Sinay response: { locations: [...], eta: "...", ... }
-                locations = data.get("locations", data.get("events", []))
-                # Map Sinay location fields to our normalized format
-                mapped_events = []
-                for loc in locations:
-                    mapped_events.append({
-                        "description": loc.get("status") or loc.get("eventName") or "",
-                        "eventDateTime": loc.get("date") or loc.get("eventDate") or "",
-                    })
-                norm = normalize_events(mapped_events)
-                # ETA
+                locs = data.get("locations", data.get("events", []))
+                events = [{"description": l.get("status") or l.get("eventName") or "",
+                           "eventDateTime": l.get("date") or l.get("eventDate") or ""}
+                          for l in locs]
+                norm = normalize_events(events)
                 for f in ("eta", "estimatedArrival", "estimatedTimeOfArrival"):
                     if data.get(f) and not norm["eta"]:
                         norm["eta"] = str(data[f])[:10]
@@ -244,48 +210,116 @@ def _track_sinay(booking, container, api_key):
     return None
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Carrier router
-# ──────────────────────────────────────────────────────────────────────────────
+# ── Carrier router ─────────────────────────────────────────────────────────────
 
 def carrier_group(carrier: str) -> str:
     c = carrier.lower()
-    if any(k in c for k in ("maersk", "maerskline")): return "maersk"
-    if any(k in c for k in ("anl",)):                  return "anl"   # anl = also cmacgm
-    if any(k in c for k in ("cma", "cma-cgm", "cmacgm")): return "cmacgm"
-    if any(k in c for k in ("hapag", "hlag", "hlcl")): return "hlag"
-    if any(k in c for k in ("msc", "mediterranean")):  return "msc"
+    if any(k in c for k in ("maersk",)):                    return "maersk"
+    if any(k in c for k in ("anl",)):                       return "anl"
+    if any(k in c for k in ("cma", "cma-cgm", "cmacgm")):  return "cmacgm"
+    if any(k in c for k in ("hapag", "hlag", "hlcl")):      return "hlag"
+    if any(k in c for k in ("msc", "mediterranean")):       return "msc"
     return "other"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Main
-# ──────────────────────────────────────────────────────────────────────────────
+# ── Per-container tracking function (called in parallel) ──────────────────────
+
+def track_one(c: dict, creds: dict, tokens: dict, force_all: bool,
+              existing_results: dict) -> tuple[str, dict]:
+    """Returns (container_id, result_dict)."""
+    cid       = c.get("id", "")
+    carrier   = c.get("carrier", "")
+    booking   = c.get("bookingNumber", "")
+    container = c.get("containerNumber", "")
+    status    = c.get("reviewStatus", "")
+    label     = container or booking or cid[:8]
+
+    # Skip completed
+    if status == "Completed":
+        return cid, {"autoTracked": False, "skipped": True, "reason": "Completed",
+                     "checkedAt": _now(), "error": None}
+
+    # Skip recently checked (unless force_all)
+    if not force_all:
+        prev = existing_results.get(cid, {})
+        prev_time = prev.get("checkedAt")
+        if prev_time and prev.get("autoTracked"):
+            try:
+                checked = datetime.fromisoformat(prev_time.rstrip("Z")).replace(tzinfo=timezone.utc)
+                age_h   = (datetime.now(timezone.utc) - checked).total_seconds() / 3600
+                if age_h < SKIP_IF_CHECKED_WITHIN_HOURS:
+                    return cid, {**prev, "skipped": True,
+                                 "reason": f"Checked {age_h:.1f}h ago (< {SKIP_IF_CHECKED_WITHIN_HOURS}h)"}
+            except Exception:
+                pass
+
+    group = carrier_group(carrier)
+    data, source, error = None, None, None
+
+    # Native carrier APIs first
+    if group == "maersk" and tokens.get("maersk"):
+        data, source = _track_maersk(booking, container, tokens["maersk"]), "Maersk API"
+    elif group in ("cmacgm", "anl") and creds.get("cmacgm_key"):
+        data, source = _track_cmacgm(booking, container, creds["cmacgm_key"]), "CMA CGM API"
+    elif group == "hlag" and tokens.get("hlag"):
+        data, source = _track_hlag(booking, container, tokens["hlag"]), "Hapag-Lloyd API"
+    elif group == "msc" and creds.get("msc_key"):
+        data, source = _track_msc(booking, container, creds["msc_key"]), "MSC API"
+
+    # Universal Sinay fallback
+    if data is None and creds.get("sinay_key"):
+        data, source = _track_sinay(booking, container, creds["sinay_key"]), "Sinay API"
+
+    if data is None:
+        error = ("No API credentials configured — add SINAY_API_KEY to repo secrets"
+                 if not any(creds.values())
+                 else f"Not found via available APIs for carrier '{carrier}'")
+
+    if data:
+        print(f"  ✓ {label} [{source}] {data.get('currentStatus') or ''}")
+        return cid, {**data, "checkedAt": _now(), "source": source,
+                     "autoTracked": True, "skipped": False, "error": None}
+    else:
+        print(f"  ✗ {label} {error}")
+        return cid, {"autoTracked": False, "skipped": False, "checkedAt": _now(), "error": error}
+
+
+# ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
     Path("public").mkdir(exist_ok=True)
+    force_all = os.environ.get("FORCE_ALL", "false").lower() == "true"
 
     containers_path = Path("data/containers.json")
     if not containers_path.exists():
-        print("No data/containers.json — sync your container list from the app first.")
-        _write_results({}, 0)
+        print("No data/containers.json — sync from the app first (⚡ Auto-Track → Step 1).")
+        _write_results({}, 0, 0, 0)
         return
 
     containers = json.loads(containers_path.read_text(encoding="utf-8"))
-    print(f"Loaded {len(containers)} containers")
+    print(f"Loaded {len(containers)} containers (force_all={force_all})")
 
-    # Load credentials
+    # Load previous results to support skip logic
+    prev_path = Path("public/auto-tracking.json")
+    existing_results = {}
+    if prev_path.exists():
+        try:
+            existing_results = json.loads(prev_path.read_text())["results"]
+        except Exception:
+            pass
+
+    # Credentials
     creds = {
-        "maersk_id":      os.environ.get("MAERSK_CLIENT_ID", "").strip(),
-        "maersk_secret":  os.environ.get("MAERSK_CLIENT_SECRET", "").strip(),
-        "cmacgm_key":     os.environ.get("CMACGM_API_KEY", "").strip(),
-        "hlag_id":        os.environ.get("HLAG_CLIENT_ID", "").strip(),
-        "hlag_secret":    os.environ.get("HLAG_CLIENT_SECRET", "").strip(),
-        "msc_key":        os.environ.get("MSC_API_KEY", "").strip(),
-        "sinay_key":      os.environ.get("SINAY_API_KEY", "").strip(),
+        "maersk_id":     os.environ.get("MAERSK_CLIENT_ID", "").strip(),
+        "maersk_secret": os.environ.get("MAERSK_CLIENT_SECRET", "").strip(),
+        "cmacgm_key":    os.environ.get("CMACGM_API_KEY", "").strip(),
+        "hlag_id":       os.environ.get("HLAG_CLIENT_ID", "").strip(),
+        "hlag_secret":   os.environ.get("HLAG_CLIENT_SECRET", "").strip(),
+        "msc_key":       os.environ.get("MSC_API_KEY", "").strip(),
+        "sinay_key":     os.environ.get("SINAY_API_KEY", "").strip(),
     }
 
-    # Pre-fetch OAuth2 tokens
+    # OAuth2 tokens (sequential, then parallel tracking)
     tokens = {}
     if creds["maersk_id"] and creds["maersk_secret"]:
         print("Getting Maersk token...")
@@ -297,87 +331,56 @@ def main():
         tokens["hlag"] = _hlag_token(creds["hlag_id"], creds["hlag_secret"])
         print("  ✓" if tokens["hlag"] else "  ✗ failed")
 
-    # Summary of active credentials
-    active = []
-    if tokens.get("maersk"):  active.append("Maersk")
-    if creds["cmacgm_key"]:   active.append("CMA CGM")
-    if tokens.get("hlag"):    active.append("Hapag-Lloyd")
-    if creds["msc_key"]:      active.append("MSC")
-    if creds["sinay_key"]:    active.append("Sinay (universal)")
-    print(f"Active APIs: {', '.join(active) or 'NONE – all containers will be flagged for manual check'}\n")
+    active_apis = [k for k, v in {
+        "Maersk": tokens.get("maersk"),
+        "CMA CGM": creds.get("cmacgm_key"),
+        "Hapag-Lloyd": tokens.get("hlag"),
+        "MSC": creds.get("msc_key"),
+        "Sinay (universal)": creds.get("sinay_key"),
+    }.items() if v]
+    print(f"Active APIs: {', '.join(active_apis) or 'NONE'}")
+    print(f"Running {min(MAX_PARALLEL_WORKERS, len(containers))} parallel workers...\n")
 
+    # ── Parallel tracking ──────────────────────────────────────────────────────
     results = {}
     tracked_count = 0
+    skipped_count = 0
 
-    for i, c in enumerate(containers):
-        carrier   = c.get("carrier", "")
-        booking   = c.get("bookingNumber", "")
-        container = c.get("containerNumber", "")
-        cid       = c.get("id", "")
-        status    = c.get("reviewStatus", "")
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_WORKERS) as executor:
+        futures = {
+            executor.submit(track_one, c, creds, tokens, force_all, existing_results): c
+            for c in containers
+        }
+        for future in as_completed(futures):
+            try:
+                cid, result = future.result()
+                results[cid] = result
+                if result.get("autoTracked"):
+                    tracked_count += 1
+                if result.get("skipped"):
+                    skipped_count += 1
+            except Exception as e:
+                c = futures[future]
+                print(f"  ✗ {c.get('containerNumber', '?')} unexpected error: {e}", file=sys.stderr)
 
-        if not cid: continue
-        if status == "Completed":
-            print(f"[{i+1}/{len(containers)}] {container} — skip (Completed)")
-            continue
-
-        group = carrier_group(carrier)
-        print(f"[{i+1}/{len(containers)}] {container or booking} ({carrier}) [{group}]...", end=" ", flush=True)
-
-        data, source, error = None, None, None
-
-        # --- Try native carrier API first ---
-        if group == "maersk" and tokens.get("maersk"):
-            data  = _track_maersk(booking, container, tokens["maersk"])
-            source = "Maersk API"
-        elif group in ("cmacgm", "anl") and creds["cmacgm_key"]:
-            data  = _track_cmacgm(booking, container, creds["cmacgm_key"])
-            source = "CMA CGM API"
-        elif group == "hlag" and tokens.get("hlag"):
-            data  = _track_hlag(booking, container, tokens["hlag"])
-            source = "Hapag-Lloyd API"
-        elif group == "msc" and creds["msc_key"]:
-            data  = _track_msc(booking, container, creds["msc_key"])
-            source = "MSC API"
-
-        # --- Fallback to Sinay universal API ---
-        if data is None and creds["sinay_key"]:
-            data  = _track_sinay(booking, container, creds["sinay_key"])
-            source = "Sinay API (universal)"
-
-        # --- No credentials available ---
-        if data is None:
-            if not active:
-                error = "No API credentials configured. Add at least SINAY_API_KEY to repo secrets."
-            else:
-                error = f"Not found via {source or 'any configured API'}"
-
-        if data:
-            results[cid] = {**data, "checkedAt": _now(), "source": source, "autoTracked": True, "error": None}
-            tracked_count += 1
-            print(f"✓ {data.get('currentStatus') or 'ok'} [{source}]")
-        else:
-            results[cid] = {"autoTracked": False, "checkedAt": _now(), "error": error}
-            print(f"✗ {error}")
-
-        time.sleep(0.4)  # gentle rate limiting
-
-    _write_results(results, len(containers), tracked_count)
-    print(f"\n✅ Done: {tracked_count}/{len(containers)} containers auto-tracked.")
+    _write_results(results, len(containers), tracked_count, skipped_count)
+    print(f"\n✅ Done: {tracked_count} tracked, {skipped_count} skipped, "
+          f"{len(containers) - tracked_count - skipped_count} errors/no-API")
 
 
 def _now():
-    return datetime.utcnow().isoformat() + "Z"
+    return datetime.now(timezone.utc).isoformat()
 
-def _write_results(results, total, tracked=0):
+def _write_results(results, total, tracked, skipped):
     out = {
-        "updatedAt": _now(),
+        "updatedAt":    _now(),
         "containerCount": total,
         "trackedCount": tracked,
-        "results": results,
+        "skippedCount": skipped,
+        "results":      results,
     }
     Path("public/auto-tracking.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
-    print(f"Written to public/auto-tracking.json ({tracked}/{total} tracked)")
+    print(f"Written → public/auto-tracking.json  ({tracked}/{total} tracked, {skipped} skipped)")
 
 
 if __name__ == "__main__":

@@ -1,20 +1,30 @@
 name: Auto-Track Containers
 
 on:
-  # Every Wednesday at 08:00 NZT (= Tuesday 20:00 UTC)
+  # Every 4 hours (6 times per day)
+  # API rate limit budget per run (free tiers):
+  #   Sinay:       ~500/day  → 6 runs × 30 containers = 180/day  ✓
+  #   Maersk:      ~25/day   → only called for Maersk/ANL containers ✓
+  #   CMA CGM:     ~200/day  → 6 × CMA containers ✓
+  #   Hapag-Lloyd: ~100/day  → 6 × HL containers ✓
+  #   MSC:         ~200/day  → 6 × MSC containers ✓
   schedule:
-    - cron: '0 20 * * 2'
+    - cron: '0 */4 * * *'
 
-  # Manual trigger from the Actions tab
+  # Manual / on-demand trigger (from app "Check All Now" button or Actions tab)
   workflow_dispatch:
     inputs:
+      force_all:
+        description: 'Force re-check all containers (ignore recently-checked)'
+        type: boolean
+        default: false
       dry_run:
-        description: 'Dry run — run tracking but do NOT commit results'
+        description: 'Dry run — do not commit results'
         type: boolean
         default: false
 
 permissions:
-  contents: write   # needed to commit auto-tracking.json back to the repo
+  contents: write
 
 jobs:
   track:
@@ -36,50 +46,38 @@ jobs:
 
       - name: Run tracking script
         env:
-          # Maersk / ANL  →  https://developer.maersk.com (free)
           MAERSK_CLIENT_ID:     ${{ secrets.MAERSK_CLIENT_ID }}
           MAERSK_CLIENT_SECRET: ${{ secrets.MAERSK_CLIENT_SECRET }}
-
-          # CMA CGM / ANL  →  https://api-portal.cma-cgm.com (free trial)
           CMACGM_API_KEY:       ${{ secrets.CMACGM_API_KEY }}
-
-          # Hapag-Lloyd  →  https://api-portal.hlag.com (free)
           HLAG_CLIENT_ID:       ${{ secrets.HLAG_CLIENT_ID }}
           HLAG_CLIENT_SECRET:   ${{ secrets.HLAG_CLIENT_SECRET }}
-
-          # MSC  →  https://developerportal.msc.com (free)
           MSC_API_KEY:          ${{ secrets.MSC_API_KEY }}
-
-          # Sinay universal API (covers 170+ carriers: ONE, Evergreen, Yang Ming, COSCO, ZIM, PIL, HMM …)
-          # Register free: https://app.sinay.ai
           SINAY_API_KEY:        ${{ secrets.SINAY_API_KEY }}
-
+          FORCE_ALL:            ${{ inputs.force_all || 'false' }}
         run: python scripts/track.py
 
       - name: Show results summary
         if: always()
         run: |
           if [ -f public/auto-tracking.json ]; then
-            echo "=== Tracking Results ==="
             python3 -c "
           import json
           with open('public/auto-tracking.json') as f:
               d = json.load(f)
-          print(f'Updated at  : {d[\"updatedAt\"]}')
-          print(f'Containers  : {d[\"containerCount\"]}')
-          print(f'Auto-tracked: {d[\"trackedCount\"]}')
-          results = d['results']
-          by_source = {}
-          for r in results.values():
-              s = r.get('source') or ('Error' if r.get('error') else 'Unknown')
-              by_source[s] = by_source.get(s, 0) + 1
-          for src, cnt in sorted(by_source.items()):
+          print(f'Updated:    {d[\"updatedAt\"]}')
+          print(f'Containers: {d[\"containerCount\"]}')
+          print(f'Tracked:    {d[\"trackedCount\"]}')
+          print(f'Skipped:    {d.get(\"skippedCount\", 0)} (recently checked)')
+          by_src = {}
+          for r in d['results'].values():
+              s = r.get('source') or ('Error' if r.get('error') else 'Skipped')
+              by_src[s] = by_src.get(s, 0) + 1
+          for src, cnt in sorted(by_src.items()):
               print(f'  {src}: {cnt}')
-          errors = [(cid, r['error']) for cid, r in results.items() if r.get('error')]
+          errors = [(k, r['error']) for k, r in d['results'].items() if r.get('error')]
           if errors:
               print(f'Errors ({len(errors)}):')
-              for cid, e in errors[:15]:
-                  print(f'  - {cid[:8]}... {e}')
+              for k, e in errors[:10]: print(f'  {k[:8]}... {e}')
           "
           fi
 
@@ -90,5 +88,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/auto-tracking.json data/containers.json 2>/dev/null || true
           git diff --staged --quiet \
-            && echo "No changes to commit — all statuses are unchanged." \
-            || (git commit -m "chore: auto-tracking update $(date -u +%Y-%m-%dT%H:%M:%SZ)" && git push)
+            && echo "No changes." \
+            || (git commit -m "chore: auto-tracking $(date -u +%Y-%m-%dT%H:%M:%SZ)" && git push)

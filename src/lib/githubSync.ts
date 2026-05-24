@@ -96,6 +96,91 @@ export async function fetchAutoTracking(baseUrl: string): Promise<AutoTrackingFi
 
 const SETTINGS_KEY = 'container-tracking-github-settings';
 
+// ── Workflow trigger & status ────────────────────────────────────────────────
+
+export async function triggerTrackingWorkflow(
+  settings: GithubSettings,
+  forceAll = false
+): Promise<void> {
+  const resp = await fetch(
+    `https://api.github.com/repos/${settings.owner}/${settings.repo}/actions/workflows/track.yml/dispatches`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `token ${settings.pat}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      body: JSON.stringify({ ref: 'main', inputs: { force_all: String(forceAll) } }),
+    }
+  );
+  // GitHub returns 204 No Content on success
+  if (!resp.ok && resp.status !== 204) {
+    const body = await resp.json().catch(() => ({})) as { message?: string };
+    throw new Error(`GitHub API ${resp.status}: ${body.message ?? resp.statusText}`);
+  }
+}
+
+export interface WorkflowRun {
+  status: 'queued' | 'in_progress' | 'completed';
+  conclusion: string | null;
+  createdAt: string;
+  updatedAt: string;
+  htmlUrl: string;
+}
+
+export async function getLatestWorkflowRun(
+  settings: GithubSettings
+): Promise<WorkflowRun | null> {
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${settings.owner}/${settings.repo}/actions/workflows/track.yml/runs?per_page=1`,
+      {
+        headers: {
+          Authorization: `token ${settings.pat}`,
+          Accept: 'application/vnd.github+json',
+        },
+      }
+    );
+    if (!resp.ok) return null;
+    const data = await resp.json() as { workflow_runs?: Array<{
+      status: string; conclusion: string | null;
+      created_at: string; updated_at: string; html_url: string;
+    }> };
+    const run = data.workflow_runs?.[0];
+    if (!run) return null;
+    return {
+      status: run.status as WorkflowRun['status'],
+      conclusion: run.conclusion,
+      createdAt: run.created_at,
+      updatedAt: run.updated_at,
+      htmlUrl: run.html_url,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Poll auto-tracking.json until its updatedAt is newer than `sinceIso`,
+ * or until `timeoutMs` elapses. Returns the new data or null on timeout.
+ */
+export async function pollForUpdatedResults(
+  baseUrl: string,
+  sinceIso: string,
+  timeoutMs = 5 * 60 * 1000,
+  intervalMs = 20_000
+): Promise<AutoTrackingFile | null> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, intervalMs));
+    const data = await fetchAutoTracking(baseUrl);
+    if (data?.updatedAt && data.updatedAt > sinceIso) return data;
+  }
+  return null;
+}
+
 export function loadGithubSettings(): GithubSettings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
