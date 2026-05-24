@@ -1,19 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Upload,
-  Download,
-  Trash2,
-  User,
-  Container,
-  FileDown,
-  Settings,
-  Zap,
-  BookOpen,
-  RefreshCw,
-  CheckCircle2,
-  AlertCircle,
+  Upload, Download, Trash2, Container, FileDown, Settings,
+  Zap, BookOpen, RefreshCw, CheckCircle2, AlertCircle,
+  LogOut, Users, Crown, Ship,
 } from 'lucide-react';
 import { HelpPage } from './pages/HelpPage';
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
+import AdminUsersPanel from './components/AdminUsersPanel';
 import { Dashboard } from './components/Dashboard';
 import { FilterBar } from './components/FilterBar';
 import { ContainerTable } from './components/ContainerTable';
@@ -21,120 +15,140 @@ import { ContainerDetail } from './components/ContainerDetail';
 import { UploadModal } from './components/UploadModal';
 import { SettingsModal } from './components/SettingsModal';
 import { useStore } from './store/useStore';
+import { useAuthStore } from './store/useAuthStore';
+import { loadUsers } from './lib/auth';
 import { exportSapUpdateReport, exportFullReport } from './lib/exporter';
 import {
-  fetchAutoTracking,
-  loadGithubSettings,
-  triggerTrackingWorkflow,
-  pollForUpdatedResults,
+  fetchAutoTracking, loadGithubSettings,
+  triggerTrackingWorkflow, pollForUpdatedResults,
 } from './lib/githubSync';
 import type { ContainerRecord, FilterState } from './types';
 
 const DEFAULT_FILTERS: FilterState = {
-  carrier: '',
-  customer: '',
-  destination: '',
-  status: '',
-  priority: '',
-  suggestedAction: '',
-  search: '',
-  etaFrom: '',
-  etaTo: '',
+  carrier: '', customer: '', destination: '', status: '',
+  priority: '', suggestedAction: '', search: '', etaFrom: '', etaTo: '',
 };
 
+// ── Root: handles landing / auth / app routing ────────────────────────────────
+
 export default function App() {
-  const containers = useStore((s) => s.containers);
-  const currentUser = useStore((s) => s.currentUser);
-  const setCurrentUser = useStore((s) => s.setCurrentUser);
-  const clearAllContainers = useStore((s) => s.clearAllContainers);
-  const mergeAutoTracking = useStore((s) => s.mergeAutoTracking);
-  const lastAutoTrackAt = useStore((s) => s.lastAutoTrackAt);
-  const sessions = useStore((s) => s.sessions);
+  const authUser    = useAuthStore(s => s.currentUser);
+  const isFirstRun  = loadUsers().length === 0;
 
-  const [showUpload, setShowUpload] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [selectedContainer, setSelectedContainer] = useState<ContainerRecord | null>(null);
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [editingUser, setEditingUser] = useState(false);
-  const [userInput, setUserInput] = useState(currentUser);
-  const [autoFetchBanner, setAutoFetchBanner] = useState<string | null>(null);
+  type Page = 'landing' | 'login' | 'register';
+  const [page, setPage] = useState<Page>('landing');
 
-  // "Check All Now" state
-  type CheckPhase = 'idle' | 'triggering' | 'waiting' | 'done' | 'error';
-  const [checkPhase, setCheckPhase] = useState<CheckPhase>('idle');
-  const [checkMessage, setCheckMessage] = useState('');
-  const lastTriggerRef = useRef<number>(0); // epoch ms of last trigger
+  // If already logged in, skip straight to the app
+  if (authUser) return <MainApp />;
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
-
-  async function fetchAndMerge(baseUrl: string): Promise<boolean> {
-    const data = await fetchAutoTracking(baseUrl);
-    if (!data?.updatedAt || data.trackedCount === 0) return false;
-    if (lastAutoTrackAt && data.updatedAt <= lastAutoTrackAt) return false;
-    mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
-    return true;
+  // First run → skip landing, go straight to admin setup
+  if (isFirstRun) {
+    return (
+      <AuthPage
+        isFirstRun
+        onBack={() => {}}
+        onSuccess={() => window.location.reload()}
+      />
+    );
   }
 
-  // ── On mount: auto-fetch + set up 4-hour background refresh ─────────────────
+  if (page === 'login' || page === 'register') {
+    return (
+      <AuthPage
+        initialMode={page}
+        isFirstRun={false}
+        onBack={() => setPage('landing')}
+        onSuccess={() => window.location.reload()}
+      />
+    );
+  }
+
+  return (
+    <LandingPage
+      onSignIn={() => setPage('login')}
+      onRegister={() => setPage('register')}
+    />
+  );
+}
+
+// ── Main App (authenticated) ──────────────────────────────────────────────────
+
+function MainApp() {
+  const containers       = useStore(s => s.containers);
+  const clearAllContainers = useStore(s => s.clearAllContainers);
+  const mergeAutoTracking  = useStore(s => s.mergeAutoTracking);
+  const lastAutoTrackAt    = useStore(s => s.lastAutoTrackAt);
+  const sessions           = useStore(s => s.sessions);
+
+  const authUser  = useAuthStore(s => s.currentUser);
+  const logout    = useAuthStore(s => s.logout);
+  const isAdmin   = authUser?.role === 'admin';
+
+  const [showUpload,      setShowUpload]      = useState(false);
+  const [showSettings,    setShowSettings]    = useState(false);
+  const [showHelp,        setShowHelp]        = useState(false);
+  const [showAdminPanel,  setShowAdminPanel]  = useState(false);
+  const [selectedContainer, setSelectedContainer] = useState<ContainerRecord | null>(null);
+  const [filters,           setFilters]           = useState<FilterState>(DEFAULT_FILTERS);
+  const [autoFetchBanner,   setAutoFetchBanner]   = useState<string | null>(null);
+
+  type CheckPhase = 'idle' | 'triggering' | 'waiting' | 'done' | 'error';
+  const [checkPhase,   setCheckPhase]   = useState<CheckPhase>('idle');
+  const [checkMessage, setCheckMessage] = useState('');
+  const lastTriggerRef = useRef<number>(0);
+
+  // ── Auto-fetch on mount + 4h background poll ──────────────────────────────
   useEffect(() => {
     const settings = loadGithubSettings();
     if (!settings.owner || !settings.repo) return;
     const baseUrl = `https://${settings.owner}.github.io/${settings.repo}`;
 
-    // Immediate check
-    fetchAndMerge(baseUrl).then((merged) => {
+    const run = async () => {
+      const data = await fetchAutoTracking(baseUrl);
+      if (!data?.updatedAt || data.trackedCount === 0) return false;
+      if (lastAutoTrackAt && data.updatedAt <= lastAutoTrackAt) return false;
+      mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
+      return true;
+    };
+
+    run().then(merged => {
       if (merged) {
-        setAutoFetchBanner(
-          `Auto-tracking results loaded — statuses are up to date.`
-        );
+        setAutoFetchBanner('Auto-tracking results loaded — statuses are up to date.');
         setTimeout(() => setAutoFetchBanner(null), 6000);
       }
     });
 
-    // Background poll every 4 hours (while tab is open)
-    const FOUR_HOURS = 4 * 60 * 60 * 1000;
-    const interval = setInterval(async () => {
-      const merged = await fetchAndMerge(baseUrl);
+    const iv = setInterval(async () => {
+      const merged = await run();
       if (merged) {
-        setAutoFetchBanner(
-          `Statuses refreshed automatically — tracking results updated.`
-        );
+        setAutoFetchBanner('Statuses refreshed automatically — tracking results updated.');
         setTimeout(() => setAutoFetchBanner(null), 6000);
       }
-    }, FOUR_HOURS);
+    }, 4 * 60 * 60 * 1000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(iv);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── "Check All Now" handler ──────────────────────────────────────────────────
+  // ── Check All Now ─────────────────────────────────────────────────────────
   async function handleCheckAll() {
-    // Cooldown: prevent double-triggering within 2 minutes
-    const COOLDOWN_MS = 2 * 60 * 1000;
-    if (Date.now() - lastTriggerRef.current < COOLDOWN_MS) {
+    const COOLDOWN = 2 * 60 * 1000;
+    if (Date.now() - lastTriggerRef.current < COOLDOWN) {
       setCheckPhase('waiting');
       setCheckMessage('Workflow already triggered — checking for results…');
       return;
     }
-
     const settings = loadGithubSettings();
-    if (!settings.owner || !settings.repo || !settings.pat) {
-      setShowSettings(true);
-      return;
-    }
-    const baseUrl = `https://${settings.owner}.github.io/${settings.repo}`;
-    const sinceIso = lastAutoTrackAt ?? new Date(0).toISOString();
-
+    if (!settings.owner || !settings.repo || !settings.pat) { setShowSettings(true); return; }
+    const baseUrl   = `https://${settings.owner}.github.io/${settings.repo}`;
+    const sinceIso  = lastAutoTrackAt ?? new Date(0).toISOString();
     try {
       setCheckPhase('triggering');
       setCheckMessage('Triggering GitHub Actions workflow…');
       await triggerTrackingWorkflow(settings, false);
       lastTriggerRef.current = Date.now();
-
       setCheckPhase('waiting');
-      setCheckMessage('Workflow running — checking for results every 20s (may take 2–4 min)…');
-
+      setCheckMessage('Workflow running — checking every 20s (2–4 min)…');
       const data = await pollForUpdatedResults(baseUrl, sinceIso, 6 * 60 * 1000, 20_000);
       if (data) {
         mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
@@ -142,185 +156,154 @@ export default function App() {
         setCheckMessage(`Done — ${data.trackedCount} containers updated.`);
       } else {
         setCheckPhase('done');
-        setCheckMessage('Workflow is still running. Results will appear on next page visit.');
+        setCheckMessage('Workflow still running. Results will appear on next page visit.');
       }
     } catch (err) {
       setCheckPhase('error');
-      setCheckMessage(
-        `Error: ${err instanceof Error ? err.message : String(err)}. ` +
-        'Check ⚡ Auto-Track → PAT has "repo" scope.'
-      );
+      setCheckMessage(`Error: ${err instanceof Error ? err.message : String(err)}`);
     }
-
     setTimeout(() => { setCheckPhase('idle'); setCheckMessage(''); }, 12_000);
   }
 
-  function handleSaveUser() {
-    setCurrentUser(userInput.trim() || 'User');
-    setEditingUser(false);
+  function handleLogout() {
+    logout();
+    window.location.reload();
   }
 
   if (showHelp) return <HelpPage onBack={() => setShowHelp(false)} />;
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* Top Nav */}
-      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+    <div className="min-h-screen" style={{ background: '#f1f5f9' }}>
+
+      {/* ── Top Nav ──────────────────────────────────────────────────── */}
+      <header style={{
+        background: 'linear-gradient(135deg, #060b18 0%, #0d1b2e 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        boxShadow: '0 2px 20px rgba(0,0,0,0.4)',
+      }} className="sticky top-0 z-40">
         <div className="max-w-screen-2xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+
+          {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Container className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', boxShadow: '0 0 16px rgba(6,182,212,0.3)' }}>
+              <Ship size={18} strokeWidth={2.5} className="text-white" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-slate-800">Container Tracking</h1>
+              <h1 className="text-sm font-bold text-white tracking-tight">ContainerFlow</h1>
               {sessions[0] && (
-                <p className="text-xs text-slate-400">
-                  Last upload: {sessions[0].filename} — {sessions[0].containerCount} containers
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {sessions[0].filename} · {sessions[0].containerCount} containers
                 </p>
               )}
             </div>
           </div>
 
+          {/* Actions */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* User identity */}
-            <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 rounded-lg px-3 py-1.5 border border-slate-200">
-              <User className="w-4 h-4 text-slate-400" />
-              {editingUser ? (
-                <input
-                  autoFocus
-                  type="text"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  onBlur={handleSaveUser}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSaveUser()}
-                  className="w-28 bg-transparent outline-none text-slate-800"
-                />
-              ) : (
-                <button onClick={() => { setEditingUser(true); setUserInput(currentUser); }}>
-                  {currentUser}
-                </button>
-              )}
-            </div>
 
-            <button
-              onClick={() => setShowUpload(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              <Upload className="w-4 h-4" /> Upload SAP Report
-            </button>
+            <NavBtn onClick={() => setShowUpload(true)} primary>
+              <Upload size={14} /> Upload SAP
+            </NavBtn>
 
-            <button
-              onClick={() => setShowSettings(true)}
-              title="Automated tracking settings"
-              className="flex items-center gap-2 px-3 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition-colors"
-            >
-              <Zap className="w-4 h-4" /> Auto-Track
-            </button>
+            <NavBtn onClick={() => setShowSettings(true)} color="#7c3aed">
+              <Zap size={14} /> Auto-Track
+            </NavBtn>
 
-            {/* Check All Now */}
             {containers.length > 0 && (
-              <button
-                onClick={handleCheckAll}
+              <button onClick={handleCheckAll}
                 disabled={checkPhase === 'triggering' || checkPhase === 'waiting'}
-                title="Trigger all carrier APIs in parallel now"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  checkPhase === 'triggering' || checkPhase === 'waiting'
-                    ? 'bg-amber-400 text-white cursor-wait'
-                    : checkPhase === 'done'
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : checkPhase === 'error'
-                    ? 'bg-red-600 text-white hover:bg-red-700'
-                    : 'bg-cyan-600 text-white hover:bg-cyan-700'
-                }`}
-              >
-                {checkPhase === 'triggering' || checkPhase === 'waiting' ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : checkPhase === 'done' ? (
-                  <CheckCircle2 className="w-4 h-4" />
-                ) : checkPhase === 'error' ? (
-                  <AlertCircle className="w-4 h-4" />
-                ) : (
-                  <RefreshCw className="w-4 h-4" />
-                )}
-                {checkPhase === 'triggering'
-                  ? 'Starting…'
-                  : checkPhase === 'waiting'
-                  ? 'Running…'
-                  : checkPhase === 'done'
-                  ? 'Updated!'
-                  : checkPhase === 'error'
-                  ? 'Error'
-                  : 'Check All Now'}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={{
+                  background: checkPhase === 'error' ? 'rgba(239,68,68,0.2)' :
+                              checkPhase === 'done'  ? 'rgba(34,197,94,0.2)' :
+                              checkPhase !== 'idle'  ? 'rgba(245,158,11,0.2)' : 'rgba(6,182,212,0.15)',
+                  border: `1px solid ${checkPhase === 'error' ? 'rgba(239,68,68,0.4)' : checkPhase === 'done' ? 'rgba(34,197,94,0.4)' : checkPhase !== 'idle' ? 'rgba(245,158,11,0.4)' : 'rgba(6,182,212,0.35)'}`,
+                  color: checkPhase === 'error' ? '#f87171' : checkPhase === 'done' ? '#4ade80' : checkPhase !== 'idle' ? '#fbbf24' : '#67e8f9',
+                }}>
+                {checkPhase === 'triggering' || checkPhase === 'waiting'
+                  ? <RefreshCw size={13} className="animate-spin" />
+                  : checkPhase === 'done' ? <CheckCircle2 size={13} />
+                  : checkPhase === 'error' ? <AlertCircle size={13} />
+                  : <RefreshCw size={13} />}
+                {checkPhase === 'triggering' ? 'Starting…' : checkPhase === 'waiting' ? 'Running…' : checkPhase === 'done' ? 'Updated!' : checkPhase === 'error' ? 'Error' : 'Check All'}
               </button>
             )}
 
             {containers.length > 0 && (
               <>
-                <button
-                  onClick={() => exportSapUpdateReport(containers)}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
-                >
-                  <Download className="w-4 h-4" /> Export SAP Updates
-                </button>
-
-                <button
-                  onClick={() => exportFullReport(containers)}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-                >
-                  <FileDown className="w-4 h-4" /> Full Report
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (confirm('Clear all containers? This cannot be undone.')) {
-                      clearAllContainers();
-                    }
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 text-red-600 rounded-lg text-sm hover:bg-red-50 transition-colors border border-red-200"
-                >
-                  <Trash2 className="w-4 h-4" />
+                <NavBtn onClick={() => exportSapUpdateReport(containers)} color="#059669">
+                  <Download size={14} /> Export SAP
+                </NavBtn>
+                <NavBtn onClick={() => exportFullReport(containers)}>
+                  <FileDown size={14} /> Full Report
+                </NavBtn>
+                <button onClick={() => { if (confirm('Clear all containers?')) clearAllContainers(); }}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{ color: '#f87171', border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+                  <Trash2 size={13} />
                 </button>
               </>
             )}
 
-            <button
-              onClick={() => setShowHelp(true)}
-              className="flex items-center gap-2 px-3 py-2 text-slate-600 rounded-lg text-sm hover:bg-slate-100 transition-colors border border-slate-200"
-              title="User Guide"
-            >
-              <BookOpen className="w-4 h-4" /> Help
-            </button>
+            <NavBtn onClick={() => setShowHelp(true)}>
+              <BookOpen size={14} /> Help
+            </NavBtn>
 
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
+            <NavBtn onClick={() => setShowSettings(true)}>
+              <Settings size={14} />
+            </NavBtn>
+
+            {/* Admin panel */}
+            {isAdmin && (
+              <button onClick={() => setShowAdminPanel(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', color: '#a78bfa' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(139,92,246,0.25)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(139,92,246,0.15)')}>
+                <Crown size={13} /> <Users size={13} />
+              </button>
+            )}
+
+            {/* User + Logout */}
+            <div className="flex items-center gap-2 pl-2 ml-1"
+              style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold uppercase"
+                style={{ background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', color: 'white' }}>
+                {authUser?.name.charAt(0) ?? '?'}
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-xs font-medium text-white">{authUser?.name}</p>
+                {isAdmin && <p className="text-xs" style={{ color: '#a78bfa' }}>Admin</p>}
+              </div>
+              <button onClick={handleLogout} title="Sign out"
+                className="ml-1 p-1.5 rounded-lg transition-all"
+                style={{ color: 'rgba(255,255,255,0.4)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
+                <LogOut size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Auto-track banner */}
       {autoFetchBanner && (
-        <div className="bg-violet-600 text-white text-sm px-6 py-2 flex items-center gap-2">
-          <Zap className="w-4 h-4 shrink-0" />
-          {autoFetchBanner}
+        <div className="text-white text-sm px-6 py-2 flex items-center gap-2"
+          style={{ background: 'linear-gradient(90deg, #7c3aed, #6d28d9)' }}>
+          <Zap size={14} className="shrink-0" /> {autoFetchBanner}
         </div>
       )}
 
       {/* Check-all status banner */}
       {checkPhase !== 'idle' && checkMessage && (
-        <div className={`text-white text-sm px-6 py-2 flex items-center gap-2 ${
-          checkPhase === 'error' ? 'bg-red-600' :
-          checkPhase === 'done'  ? 'bg-emerald-600' : 'bg-amber-500'
-        }`}>
+        <div className="text-white text-sm px-6 py-2 flex items-center gap-2"
+          style={{ background: checkPhase === 'error' ? '#dc2626' : checkPhase === 'done' ? '#059669' : '#d97706' }}>
           {checkPhase === 'triggering' || checkPhase === 'waiting'
-            ? <RefreshCw className="w-4 h-4 shrink-0 animate-spin" />
-            : checkPhase === 'done'
-            ? <CheckCircle2 className="w-4 h-4 shrink-0" />
-            : <AlertCircle className="w-4 h-4 shrink-0" />}
+            ? <RefreshCw size={14} className="shrink-0 animate-spin" />
+            : checkPhase === 'done' ? <CheckCircle2 size={14} className="shrink-0" />
+            : <AlertCircle size={14} className="shrink-0" />}
           {checkMessage}
         </div>
       )}
@@ -328,21 +311,45 @@ export default function App() {
       {/* Main Content */}
       <main className="max-w-screen-2xl mx-auto px-6 py-6">
         <Dashboard />
-        {containers.length > 0 && (
-          <FilterBar filters={filters} onChange={setFilters} />
-        )}
+        {containers.length > 0 && <FilterBar filters={filters} onChange={setFilters} />}
         <ContainerTable filters={filters} onSelect={setSelectedContainer} />
       </main>
 
       {/* Modals */}
-      {showUpload && <UploadModal onClose={() => setShowUpload(false)} />}
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showUpload     && <UploadModal onClose={() => setShowUpload(false)} />}
+      {showSettings   && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showAdminPanel && <AdminUsersPanel onClose={() => setShowAdminPanel(false)} />}
       {selectedContainer && (
-        <ContainerDetail
-          container={selectedContainer}
-          onClose={() => setSelectedContainer(null)}
-        />
+        <ContainerDetail container={selectedContainer} onClose={() => setSelectedContainer(null)} />
       )}
     </div>
+  );
+}
+
+// ── Shared nav button ─────────────────────────────────────────────────────────
+
+function NavBtn({
+  children, onClick, primary = false, color,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  primary?: boolean;
+  color?: string;
+}) {
+  const bg = primary ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : color ? undefined : undefined;
+  const base: React.CSSProperties = primary
+    ? { background: bg!, boxShadow: '0 2px 10px rgba(6,182,212,0.25)', color: 'white' }
+    : color
+    ? { background: `${color}22`, border: `1px solid ${color}44`, color }
+    : { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)' };
+
+  return (
+    <button onClick={onClick}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+      style={base}
+      onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+      onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
+      {children}
+    </button>
   );
 }
