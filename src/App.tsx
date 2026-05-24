@@ -149,14 +149,19 @@ function MainApp() {
 
   // ── Check All Now ─────────────────────────────────────────────────────────
   async function handleCheckAll() {
+    const settings = loadGithubSettings();
+    if (!settings.pat) {
+      setCheckPhase('error');
+      setCheckMessage('GitHub PAT not set — open ⚙ Settings to configure.');
+      setTimeout(() => { setCheckPhase('idle'); setCheckMessage(''); }, 8000);
+      return;
+    }
     const COOLDOWN = 2 * 60 * 1000;
     if (Date.now() - lastTriggerRef.current < COOLDOWN) {
       setCheckPhase('waiting');
       setCheckMessage('Workflow already triggered — checking for results…');
       return;
     }
-    const settings = loadGithubSettings();
-    if (!settings.owner || !settings.repo || !settings.pat) { setShowSettings(true); return; }
     const baseUrl   = `https://${settings.owner}.github.io/${settings.repo}`;
     const sinceIso  = lastAutoTrackAt ?? new Date(0).toISOString();
     try {
