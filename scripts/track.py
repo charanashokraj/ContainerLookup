@@ -30,6 +30,40 @@ SKIP_IF_CHECKED_WITHIN_HOURS = 3      # skip containers checked less than 3h ago
 MAX_PARALLEL_WORKERS = 10             # parallel API calls
 REQUEST_TIMEOUT = 30
 
+# ── Carrier SCAC code map (passed to Sinay for faster / more accurate results) ─
+CARRIER_SCAC: dict[str, str] = {
+    "maersk":        "MAEU",
+    "anl":           "ANNU",
+    "cma":           "CMDU",
+    "cma-cgm":       "CMDU",
+    "cmacgm":        "CMDU",
+    "hapag":         "HLCU",
+    "hlag":          "HLCU",
+    "hlcl":          "HLCU",
+    "msc":           "MSCU",
+    "mediterranean": "MSCU",
+    "one":           "ONEY",
+    "ocean network": "ONEY",
+    "evergreen":     "EGLV",
+    "cosco":         "COSU",
+    "yang ming":     "YMLU",
+    "yangming":      "YMLU",
+    "pil":           "PCIU",
+    "pacific int":   "PCIU",
+    "zim":           "ZIMU",
+    "hmm":           "HDMU",
+    "hyundai":       "HDMU",
+    "wan hai":       "WHLC",
+    "ts lines":      "TSPU",
+}
+
+def _scac(carrier: str) -> str | None:
+    c = carrier.lower()
+    for key, code in CARRIER_SCAC.items():
+        if key in c:
+            return code
+    return None
+
 # ── DCSA event code tables ─────────────────────────────────────────────────────
 DISCHARGE_CODES  = {"DISC"}
 RELEASE_CODES    = {"GOUT"}
@@ -186,27 +220,72 @@ def _track_msc(booking, container, api_key):
 
 # ── Sinay (universal, 170+ carriers) ──────────────────────────────────────────
 
-def _track_sinay(booking, container, api_key):
-    hdrs = {"API_KEY": api_key, "Accept": "application/json"}
-    for stype, val in [("CT", container), ("BL", booking)]:
-        if not val: continue
+def _track_sinay(booking, container, api_key, carrier=""):
+    """
+    API ref: https://api.sinay.ai/doc/index.html?urls.primaryName=Container+tracking+API+v2
+    Required header:  API_KEY
+    Required param:   shipmentNumber  (BL/BK/CT number)
+    Optional param:   shipmentType    (BL | BK | CT)
+    Optional param:   sealine         (4-letter SCAC — strongly recommended for speed)
+    """
+    hdrs    = {"API_KEY": api_key, "Accept": "application/json"}
+    scac    = _scac(carrier)
+    base    = "https://api.sinay.ai/container-tracking/api/v2/shipment"
+
+    for stype, val in [("CT", container), ("BL", booking), ("BK", booking)]:
+        if not val:
+            continue
+        params: dict = {
+            "shipmentNumber": val,   # ← correct param name (was "number")
+            "shipmentType":   stype,
+            "route":          "false",   # skip route/AIS data — faster
+            "ais":            "false",
+        }
+        if scac:
+            params["sealine"] = scac
+
         try:
-            r = requests.get("https://api-dev.sinay.ai/container-tracking/api/v2/shipment",
-                             headers=hdrs, params={"shipmentType": stype, "number": val},
-                             timeout=REQUEST_TIMEOUT)
-            if r.ok:
-                data = r.json()
-                locs = data.get("locations", data.get("events", []))
-                events = [{"description": l.get("status") or l.get("eventName") or "",
-                           "eventDateTime": l.get("date") or l.get("eventDate") or ""}
-                          for l in locs]
-                norm = normalize_events(events)
-                for f in ("eta", "estimatedArrival", "estimatedTimeOfArrival"):
-                    if data.get(f) and not norm["eta"]:
-                        norm["eta"] = str(data[f])[:10]
-                return norm
+            r = requests.get(base, headers=hdrs, params=params, timeout=REQUEST_TIMEOUT)
+            if not r.ok:
+                print(f"  [Sinay] {stype} {val}: HTTP {r.status_code} — {r.text[:120]}",
+                      file=sys.stderr)
+                continue
+
+            data = r.json()
+
+            # Events are nested: containers[].events[]
+            raw_events = []
+            for cont in data.get("containers", []):
+                raw_events.extend(cont.get("events", []))
+
+            # Map to our normalizer's expected shape
+            mapped = [
+                {
+                    "description":            ev.get("description", ""),
+                    "equipmentEventTypeCode": ev.get("eventCode", ""),
+                    "eventDateTime":          ev.get("date", ""),
+                }
+                for ev in raw_events
+            ]
+
+            norm = normalize_events(mapped)
+
+            # ETA from route.pod (prefer estimated over actual)
+            route = data.get("route") or {}
+            pod   = route.get("pod") or {}
+            if pod.get("date") and not norm["eta"]:
+                norm["eta"] = str(pod["date"])[:10]
+
+            # Fallback: shippingStatus from metadata
+            meta = data.get("metadata") or {}
+            if not norm["currentStatus"] and meta.get("shippingStatus"):
+                norm["currentStatus"] = meta["shippingStatus"].replace("_", " ").title()
+
+            return norm
+
         except Exception as e:
-            print(f"  [Sinay] {e}", file=sys.stderr)
+            print(f"  [Sinay] {stype} {val}: {e}", file=sys.stderr)
+
     return None
 
 
@@ -266,9 +345,9 @@ def track_one(c: dict, creds: dict, tokens: dict, force_all: bool,
     elif group == "msc" and creds.get("msc_key"):
         data, source = _track_msc(booking, container, creds["msc_key"]), "MSC API"
 
-    # Universal Sinay fallback
+    # Universal Sinay fallback (pass carrier so it can include the SCAC code)
     if data is None and creds.get("sinay_key"):
-        data, source = _track_sinay(booking, container, creds["sinay_key"]), "Sinay API"
+        data, source = _track_sinay(booking, container, creds["sinay_key"], carrier), "Sinay API"
 
     if data is None:
         error = ("No API credentials configured — add SINAY_API_KEY to repo secrets"
