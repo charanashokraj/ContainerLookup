@@ -15,8 +15,8 @@
     "name": "Camila Lehnen",
     "passwordHash": "245a174189564c05bcc1815d33e465ba2c6ff51f67365cf4d178b39feeb2c5b7",
     "role": "user",
-    "status": "pending",
+    "status": "active",
     "createdAt": "2026-05-24T21:01:43.577Z",
-    "activatedAt": null
+    "activatedAt": "2026-05-24T21:08:27.574Z"
   }
 ]
