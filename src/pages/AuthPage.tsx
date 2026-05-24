@@ -6,13 +6,12 @@ type View = 'login' | 'register' | 'setup';
 
 interface Props {
   initialMode?: View;
-  isFirstRun:   boolean;
   onBack:       () => void;
   onSuccess:    () => void;
 }
 
-export default function AuthPage({ initialMode = 'login', isFirstRun, onBack, onSuccess }: Props) {
-  const [view, setView] = useState<View>(isFirstRun ? 'setup' : initialMode);
+export default function AuthPage({ initialMode = 'login', onBack, onSuccess }: Props) {
+  const [view, setView] = useState<View>(initialMode);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden"
@@ -30,12 +29,12 @@ export default function AuthPage({ initialMode = 'login', isFirstRun, onBack, on
         </div>
 
         <div className="glass-card rounded-2xl p-8 animate-fade-up">
-          {view === 'setup'    && <SetupForm onSuccess={onSuccess} />}
-          {view === 'login'    && <LoginForm onSuccess={onSuccess} onRegister={() => setView('register')} />}
+          {view === 'setup'    && <SetupForm onSuccess={onSuccess} onBack={() => setView('login')} />}
+          {view === 'login'    && <LoginForm onSuccess={onSuccess} onRegister={() => setView('register')} onSetup={() => setView('setup')} />}
           {view === 'register' && <RegisterForm onBack={() => setView('login')} />}
         </div>
 
-        {!isFirstRun && view !== 'register' && (
+        {view !== 'register' && (
           <button onClick={onBack}
             className="flex items-center gap-2 mx-auto mt-6 text-sm transition-colors"
             style={{ color: 'rgba(255,255,255,0.35)', display: 'flex' }}
@@ -51,7 +50,7 @@ export default function AuthPage({ initialMode = 'login', isFirstRun, onBack, on
 
 // ── First-Run Admin Setup ─────────────────────────────────────────────────────
 
-function SetupForm({ onSuccess }: { onSuccess: () => void }) {
+function SetupForm({ onSuccess, onBack }: { onSuccess: () => void; onBack: () => void }) {
   const { setupAdmin } = useAuthStore();
   const [name,    setName]    = useState('');
   const [email,   setEmail]   = useState('');
@@ -72,11 +71,17 @@ function SetupForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div>
-        <h2 className="font-bold text-xl text-white mb-1">Admin Setup</h2>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Create your admin account. This only runs once.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="font-bold text-xl text-white mb-1">Admin Setup</h2>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Create the first admin account.
+          </p>
+        </div>
+        <button type="button" onClick={onBack}
+          className="flex items-center gap-1 text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <ArrowLeft size={12} /> Sign in
+        </button>
       </div>
 
       <Field label="Full Name"     value={name}  onChange={setName}  placeholder="Your name" autoFocus />
@@ -91,7 +96,7 @@ function SetupForm({ onSuccess }: { onSuccess: () => void }) {
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 
-function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegister: () => void }) {
+function LoginForm({ onSuccess, onRegister, onSetup }: { onSuccess: () => void; onRegister: () => void; onSetup: () => void }) {
   const { login } = useAuthStore();
   const [email,   setEmail]   = useState('');
   const [pw,      setPw]      = useState('');
@@ -128,6 +133,16 @@ function LoginForm({ onSuccess, onRegister }: { onSuccess: () => void; onRegiste
           onMouseEnter={e => (e.currentTarget.style.color = '#a5f3fc')}
           onMouseLeave={e => (e.currentTarget.style.color = '#67e8f9')}>
           Request access
+        </button>
+      </p>
+
+      <p className="text-center text-xs mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>
+        First-time setup?{' '}
+        <button type="button" onClick={onSetup}
+          className="underline" style={{ color: 'rgba(255,255,255,0.3)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}>
+          Create admin account
         </button>
       </p>
     </form>

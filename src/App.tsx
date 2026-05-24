@@ -32,9 +32,9 @@ const DEFAULT_FILTERS: FilterState = {
 // ── Root: initialization → landing / auth / app routing ──────────────────────
 
 export default function App() {
-  const { profile, initialized, isFirstRun, initialize } = useAuthStore();
+  const { profile, initialized, initialize } = useAuthStore();
 
-  type Page = 'landing' | 'login' | 'register';
+  type Page = 'landing' | 'login' | 'register' | 'setup';
   const [page, setPage] = useState<Page>('landing');
 
   useEffect(() => { initialize(); }, []);  // eslint-disable-line react-hooks/exhaustive-deps
@@ -57,21 +57,10 @@ export default function App() {
 
   if (profile) return <MainApp />;
 
-  if (isFirstRun) {
+  if (page === 'login' || page === 'register' || page === 'setup') {
     return (
       <AuthPage
-        isFirstRun
-        onBack={() => {}}
-        onSuccess={() => window.location.reload()}
-      />
-    );
-  }
-
-  if (page === 'login' || page === 'register') {
-    return (
-      <AuthPage
-        initialMode={page}
-        isFirstRun={false}
+        initialMode={page === 'setup' ? 'setup' : page}
         onBack={() => setPage('landing')}
         onSuccess={() => window.location.reload()}
       />
