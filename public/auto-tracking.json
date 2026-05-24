@@ -1,6 +1,20 @@
 {
-  "updatedAt": null,
-  "containerCount": 0,
+  "updatedAt": "2026-05-24T10:20:09.790889+00:00",
+  "containerCount": 2,
   "trackedCount": 0,
-  "results": {}
+  "skippedCount": 0,
+  "results": {
+    "958c586f-9641-4d84-8d8b-671ccfe9497b": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-05-24T10:20:09.790612+00:00",
+      "error": "No API credentials configured \u2014 add SINAY_API_KEY to repo secrets"
+    },
+    "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-05-24T10:20:09.790767+00:00",
+      "error": "No API credentials configured \u2014 add SINAY_API_KEY to repo secrets"
+    }
+  }
 }
