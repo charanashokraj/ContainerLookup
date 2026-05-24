@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-05-24T13:46:49.616850+00:00",
+  "updatedAt": "2026-05-24T17:09:30.970915+00:00",
   "containerCount": 2,
   "trackedCount": 2,
-  "skippedCount": 2,
+  "skippedCount": 0,
   "results": {
     "958c586f-9641-4d84-8d8b-671ccfe9497b": {
       "dischargeDate": null,
@@ -16,12 +16,11 @@
       "vesselName": "EUPHRATES",
       "portOfLoading": "BRISBANE",
       "portOfDischarge": "ALEXANDRIA",
-      "checkedAt": "2026-05-24T11:30:05.307538+00:00",
+      "checkedAt": "2026-05-24T17:09:30.921368+00:00",
       "source": "Sinay API",
       "autoTracked": true,
-      "skipped": true,
-      "error": null,
-      "reason": "Checked 2.3h ago (< 3h)"
+      "skipped": false,
+      "error": null
     },
     "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
       "dischargeDate": null,
@@ -35,12 +34,11 @@
       "vesselName": "MAERSK SEMAKAU",
       "portOfLoading": "MELBOURNE",
       "portOfDischarge": "ALEXANDRIA",
-      "checkedAt": "2026-05-24T11:30:05.131831+00:00",
+      "checkedAt": "2026-05-24T17:09:30.970629+00:00",
       "source": "Sinay API",
       "autoTracked": true,
-      "skipped": true,
-      "error": null,
-      "reason": "Checked 2.3h ago (< 3h)"
+      "skipped": false,
+      "error": null
     }
   }
 }
