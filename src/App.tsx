@@ -229,8 +229,8 @@ function MainApp() {
     setTimeout(() => { setCheckPhase('idle'); setCheckMessage(''); }, 12_000);
   }
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     window.location.reload();
   }
 
