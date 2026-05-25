@@ -36,6 +36,17 @@ describe('computeDecision — IN_TRANSIT', () => {
     expect(r.suggestedEventDate).toBe('2025-06-15');
   });
 
+  it('No Update Required when carrier shows in-transit despite a transshipment discharge date', () => {
+    // e.g. BNEG02425900: transshipment discharge was detected but container is still sailing
+    const c = makeContainerWithStatus('IN_TRANSIT', {
+      dischargeDate: '2025-06-10',
+      currentStatus: 'Loaded On Board',
+    });
+    const r = computeDecision(c);
+    expect(r.reviewStatus).toBe('No Update Required');
+    expect(r.suggestedAction).toBe('No update required');
+  });
+
   it('Action Required when carrier ETA differs from SAP ETA', () => {
     const c = makeContainerWithStatus('IN_TRANSIT', { eta: '2025-06-15' });
     c.sapEta = '2025-06-01';

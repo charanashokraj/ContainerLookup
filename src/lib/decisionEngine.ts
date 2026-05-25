@@ -79,6 +79,16 @@ export function computeDecision(record: ContainerRecord): DecisionResult {
 
   if (sapStatus === 'IN_TRANSIT') {
     if (ce.dischargeDate) {
+      // Guard: if carrier's own last status still shows in-transit the discharge
+      // date is from a transshipment leg, not the final destination — don't action it.
+      if (carrierShowsInTransit(ce.currentStatus)) {
+        return {
+          reviewStatus: 'No Update Required',
+          suggestedAction: 'No update required',
+          suggestedEventDate: null,
+          reason: `Container is in transit ("${ce.currentStatus}"). Discharge date detected is from a transshipment leg, not the final port.`,
+        };
+      }
       return {
         reviewStatus: 'Action Required',
         suggestedAction: 'Add container discharged event',

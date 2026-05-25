@@ -12,7 +12,7 @@ function fmt(dateStr: string | null | undefined): string {
   try {
     const d = parseISO(dateStr);
     if (!isValid(d)) return dateStr;
-    return format(d, 'dd/MM/yy');
+    return format(d, 'dd/MM/yyyy');
   } catch { return dateStr; }
 }
 
@@ -21,7 +21,7 @@ function fmtDateTime(dateStr: string | null | undefined): string {
   try {
     const d = parseISO(dateStr);
     if (!isValid(d)) return dateStr;
-    return format(d, 'dd/MM/yy HH:mm');
+    return format(d, 'dd/MM/yyyy HH:mm');
   } catch { return dateStr; }
 }
 
@@ -242,8 +242,8 @@ export function ContainerTable({ filters, onSelect }: Props) {
         style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
-            <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(16px)' }}>
+              <tr style={{ background: 'rgba(15,23,42,0.92)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 {['Priority','Shipment No','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
                   ...(isAdmin ? ['Uploaded By'] : []),
                   ''].map(h => (
