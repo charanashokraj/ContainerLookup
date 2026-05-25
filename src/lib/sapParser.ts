@@ -32,20 +32,36 @@ function findColumn(headers: string[], field: string): string | null {
 }
 
 /** Normalise any date string to YYYY-MM-DD (ISO).
- *  Handles: DD/MM/YYYY, DD-MM-YYYY, MM/DD/YYYY ambiguity is avoided by
- *  checking day > 12 (unambiguous) and falling back to DD/MM assumption. */
+ *  Handles: ISO, DD/MM/YYYY, MM/DD/YYYY, DD/MM/YY, MM/DD/YY */
 function normaliseDate(raw: string): string {
   if (!raw) return '';
   const s = raw.trim();
   // Already ISO — leave alone
   if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-  // DD/MM/YYYY or DD-MM-YYYY
-  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if (m) {
-    const [, a, b, y] = m;
-    // If a > 12 it must be the day; assume DD/MM otherwise
-    return `${y}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;
+
+  // 4-digit year: M/D/YYYY or DD/MM/YYYY or DD-MM-YYYY
+  const m4 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m4) {
+    const [, a, b, y] = m4;
+    // If a > 12 it must be the day (DD/MM/YYYY); otherwise assume DD/MM
+    // If b > 12 it must be the day (MM/DD/YYYY)
+    if (Number(b) > 12) {
+      return `${y}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`; // MM/DD/YYYY
+    }
+    return `${y}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;   // DD/MM/YYYY
   }
+
+  // 2-digit year: M/D/YY — treat as 20YY
+  const m2 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+  if (m2) {
+    const [, a, b, yy] = m2;
+    const y = `20${yy}`;
+    if (Number(b) > 12) {
+      return `${y}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`; // MM/DD/YY
+    }
+    return `${y}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`;   // DD/MM/YY
+  }
+
   return s;
 }
 

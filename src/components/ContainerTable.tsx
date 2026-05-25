@@ -5,24 +5,39 @@ import { PriorityBadge, StatusBadge } from './Badge';
 import { useStore } from '../store/useStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { getTrackingUrl } from '../lib/carriers';
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parse, parseISO, isValid } from 'date-fns';
+
+// Attempt to parse a date string in any of these formats (in order)
+const DATE_FORMATS = [
+  'yyyy-MM-dd',   // ISO — most reliable, try first
+  'M/d/yy',      // US 2-digit year  e.g. 3/16/26
+  'M/d/yyyy',    // US 4-digit year  e.g. 3/16/2026
+  'dd/MM/yyyy',  // AU/EU            e.g. 16/03/2026
+  'dd-MM-yyyy',  // dash separator   e.g. 16-03-2026
+  'MM/dd/yyyy',  // US padded        e.g. 03/16/2026
+];
+const REF = new Date(2000, 0, 1);
+
+function parseDate(dateStr: string): Date | null {
+  for (const fmt of DATE_FORMATS) {
+    try {
+      const d = fmt === 'yyyy-MM-dd' ? parseISO(dateStr) : parse(dateStr, fmt, REF);
+      if (isValid(d)) return d;
+    } catch { /* try next */ }
+  }
+  return null;
+}
 
 function fmt(dateStr: string | null | undefined): string {
   if (!dateStr) return '–';
-  try {
-    const d = parseISO(dateStr);
-    if (!isValid(d)) return dateStr;
-    return format(d, 'dd/MM/yyyy');
-  } catch { return dateStr; }
+  const d = parseDate(dateStr.trim());
+  return d ? format(d, 'dd/MM/yyyy') : dateStr;
 }
 
 function fmtDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '–';
-  try {
-    const d = parseISO(dateStr);
-    if (!isValid(d)) return dateStr;
-    return format(d, 'dd/MM/yyyy HH:mm');
-  } catch { return dateStr; }
+  const d = parseDate(dateStr.trim());
+  return d ? format(d, 'dd/MM/yyyy HH:mm') : dateStr;
 }
 
 interface Props {
