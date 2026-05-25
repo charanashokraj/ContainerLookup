@@ -84,10 +84,11 @@ function StatusBar({ containers }: { containers: ContainerRecord[] }) {
   if (total === 0) return null;
 
   const segments = [
-    { label: 'Action Required',    color: '#f97316', n: cnt(containers, c => c.reviewStatus === 'Action Required') },
-    { label: 'Pending Review',     color: '#eab308', n: cnt(containers, c => c.reviewStatus === 'Pending Review') },
-    { label: 'No Update Required', color: '#3b82f6', n: cnt(containers, c => c.reviewStatus === 'No Update Required') },
-    { label: 'Completed',          color: '#22c55e', n: cnt(containers, c => c.reviewStatus === 'Completed') },
+    { label: 'Action Required',    color: '#ea580c', n: cnt(containers, c => c.reviewStatus === 'Action Required') },
+    { label: 'Pending Review',     color: '#ca8a04', n: cnt(containers, c => c.reviewStatus === 'Pending Review') },
+    { label: 'No Update Required', color: '#2563eb', n: cnt(containers, c => c.reviewStatus === 'No Update Required') },
+    { label: 'Auto-Reviewed',      color: '#0891b2', n: cnt(containers, c => c.reviewStatus === 'Auto-Reviewed') },
+    { label: 'Completed',          color: '#16a34a', n: cnt(containers, c => c.reviewStatus === 'Completed') },
   ];
 
   return (
@@ -111,7 +112,7 @@ function StatusBar({ containers }: { containers: ContainerRecord[] }) {
           <div key={s.label} className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: s.color }} />
             <span className="text-xs" style={{ color: '#64748b' }}>
-              {s.label} <span className="font-semibold" style={{ color: '#0f172a' }}>{s.n}</span>
+              {s.label} <span className="font-semibold" style={{ color: s.n > 0 ? s.color : '#94a3b8' }}>{s.n}</span>
             </span>
           </div>
         ))}
