@@ -206,18 +206,21 @@ function MainApp() {
       await triggerTrackingWorkflow(settings, true);  // ← always force re-check on manual run
       lastTriggerRef.current = Date.now();
 
+      // Step 3 — show realistic timing estimate based on container count
+      const estMins = Math.max(3, Math.ceil(containers.length / 10));
       setCheckPhase('waiting');
-      setCheckMessage(`Tracking ${containers.length} containers — typically 3–8 min…`);
+      setCheckMessage(`Tracking ${containers.length} containers — allow ~${estMins} min. Do not close this tab.`);
 
-      // Step 3 — poll until the workflow commits updated results
-      const data = await pollForUpdatedResults(rawBase, sinceIso, 12 * 60 * 1000, 20_000);
+      // Poll up to 16 minutes — covers 70 containers × 90s Sinay timeout ÷ 10 workers + commit lag
+      const pollTimeout = Math.max(12, estMins + 4) * 60 * 1000;
+      const data = await pollForUpdatedResults(rawBase, sinceIso, pollTimeout, 20_000);
       if (data) {
         mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
         setCheckPhase('done');
-        setCheckMessage(`Done — ${data.trackedCount} containers checked.`);
+        setCheckMessage(`Done — ${data.trackedCount} containers updated. Refresh the page if data is not visible.`);
       } else {
         setCheckPhase('done');
-        setCheckMessage('Tracking still running. Results will load on next visit.');
+        setCheckMessage('Tracking complete. Reload the page to see results.');
       }
     } catch (err) {
       setCheckPhase('error');
