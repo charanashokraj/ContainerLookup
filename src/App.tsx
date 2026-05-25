@@ -254,7 +254,7 @@ function MainApp() {
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         boxShadow: '0 2px 20px rgba(0,0,0,0.4)',
       }} className="sticky top-0 z-40">
-        <div className="max-w-screen-2xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+        <div className="w-full px-3 py-3 flex items-center justify-between gap-4">
 
           {/* Brand */}
           <div className="flex items-center gap-3">
@@ -393,7 +393,7 @@ function MainApp() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-screen-2xl mx-auto px-6 py-6" style={{ minHeight: 'calc(100vh - 56px)' }}>
+      <main className="w-full px-3 py-6" style={{ minHeight: 'calc(100vh - 56px)' }}>
         <Dashboard />
         {containers.length > 0 && <FilterBar filters={filters} onChange={setFilters} />}
         <ContainerTable filters={filters} onSelect={setSelectedContainer} />

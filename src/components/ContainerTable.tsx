@@ -240,10 +240,11 @@ export function ContainerTable({ filters, onSelect }: Props) {
       {/* ── Main table ───────────────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden"
         style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
-        <div className="overflow-x-auto">
+        {/* overflow-x + overflow-y both set so thead position:sticky works within this container */}
+        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100vh - 310px)' }}>
           <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead style={{ position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(16px)' }}>
-              <tr style={{ background: 'rgba(15,23,42,0.92)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <tr style={{ background: 'rgba(15,23,42,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 {['Priority','Shipment No','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
                   ...(isAdmin ? ['Uploaded By'] : []),
                   ''].map(h => (
