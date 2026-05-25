@@ -7,6 +7,7 @@ import { computeDecision, computePriority } from './decisionEngine';
 
 // Flexible column header aliases — maps our internal field → possible column names in the SAP export
 const COLUMN_ALIASES: Record<string, string[]> = {
+  shipmentNumber: ['shipment number', 'shipment no', 'shipment no.', 'ship. no', 'ship no', 'shipment', 'shpmt no', 'shpmt number', 'shp no'],
   bookingNumber: ['booking number', 'booking no', 'booking', 'bl number', 'bl no', 'b/l'],
   containerNumber: ['container number', 'container no', 'container', 'cntr', 'cntr no'],
   carrier: ['shipping line', 'carrier', 'line', 'shipping line / carrier'],
@@ -55,6 +56,7 @@ function mapRow(row: Record<string, string>, headers: string[]): ContainerRecord
   };
   const getDate = (field: string) => normaliseDate(get(field));
 
+  const shipmentNumber = get('shipmentNumber');
   const bookingNumber = get('bookingNumber');
   const containerNumber = get('containerNumber');
 
@@ -65,6 +67,7 @@ function mapRow(row: Record<string, string>, headers: string[]): ContainerRecord
 
   const base: ContainerRecord = {
     id: uuid(),
+    shipmentNumber,
     bookingNumber,
     containerNumber,
     carrier: get('carrier'),

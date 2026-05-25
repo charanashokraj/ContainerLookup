@@ -36,6 +36,7 @@ function applyFilters(containers: ContainerRecord[], f: FilterState): ContainerR
       const q = f.search.toLowerCase();
       const hit = c.containerNumber.toLowerCase().includes(q) ||
                   c.bookingNumber.toLowerCase().includes(q) ||
+                  (c.shipmentNumber ?? '').toLowerCase().includes(q) ||
                   c.customer.toLowerCase().includes(q) ||
                   c.destinationPort.toLowerCase().includes(q) ||
                   c.carrier.toLowerCase().includes(q);
@@ -243,7 +244,7 @@ export function ContainerTable({ filters, onSelect }: Props) {
           <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                {['Priority','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
+                {['Priority','Shipment No','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
                   ...(isAdmin ? ['Uploaded By'] : []),
                   ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap"
@@ -276,6 +277,13 @@ export function ContainerTable({ filters, onSelect }: Props) {
                         isManual={(c.manualPriority ?? null) !== null}
                         onClick={(e: React.MouseEvent) => openPriority(e, c.id)}
                       />
+                    </td>
+
+                    {/* Shipment number */}
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                        {c.shipmentNumber || '–'}
+                      </span>
                     </td>
 
                     {/* Container number */}

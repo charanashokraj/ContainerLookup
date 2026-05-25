@@ -10,6 +10,7 @@ export const EMPTY_CARRIER_EVENTS: CarrierEvents = {
 export function makeContainer(overrides: Partial<ContainerRecord> = {}): ContainerRecord {
   return {
     id: 'test-id-001',
+    shipmentNumber: 'SHP001',
     bookingNumber: 'BKG001',
     containerNumber: 'MSCU1234567',
     carrier: 'MSC',

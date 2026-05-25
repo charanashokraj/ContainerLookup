@@ -52,6 +52,7 @@ export interface ContainerRecord {
   id: string;
 
   // SAP fields
+  shipmentNumber: string;
   bookingNumber: string;
   containerNumber: string;
   carrier: string;
