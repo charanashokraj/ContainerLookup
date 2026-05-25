@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ExternalLink, Eye, CheckCircle, AlertTriangle, RefreshCw, MapPin, Ship, Package, X, User } from 'lucide-react';
+import { ExternalLink, Eye, CheckCircle, AlertTriangle, RefreshCw, MapPin, Ship, Package, X, User, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import type { ContainerRecord, FilterState, Priority, ReviewStatus } from '../types';
 import { PriorityBadge, StatusBadge } from './Badge';
 import { useStore } from '../store/useStore';
@@ -67,6 +67,49 @@ function applyFilters(containers: ContainerRecord[], f: FilterState): ContainerR
   });
 }
 
+// ── Sorting ──────────────────────────────────────────────────────────────────
+
+type SortKey =
+  | 'priority' | 'shipmentNumber' | 'containerNumber' | 'bookingNumber'
+  | 'carrier' | 'customer' | 'sapStatus' | 'sapEta' | 'carrierEta'
+  | 'reviewStatus' | 'suggestedAction' | 'lastChecked';
+
+type SortDir = 'asc' | 'desc';
+
+const PRIORITY_ORDER: Record<Priority, number> = { High: 0, Medium: 1, Low: 2 };
+const REVIEW_ORDER: Record<ReviewStatus, number> = {
+  'Action Required': 0, 'Pending Review': 1, 'No Update Required': 2,
+  'Auto-Reviewed': 3, 'Completed': 4,
+};
+
+function toMs(dateStr: string | null | undefined): number {
+  if (!dateStr) return Infinity;
+  const d = parseDate(dateStr.trim());
+  return d ? d.getTime() : Infinity;
+}
+
+function applySort(rows: ContainerRecord[], key: SortKey, dir: SortDir): ContainerRecord[] {
+  const sign = dir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    let cmp = 0;
+    switch (key) {
+      case 'priority':        cmp = PRIORITY_ORDER[a.priority]     - PRIORITY_ORDER[b.priority];     break;
+      case 'reviewStatus':    cmp = REVIEW_ORDER[a.reviewStatus]   - REVIEW_ORDER[b.reviewStatus];   break;
+      case 'sapEta':          cmp = toMs(a.sapEta)                 - toMs(b.sapEta);                 break;
+      case 'carrierEta':      cmp = toMs(a.carrierEta)             - toMs(b.carrierEta);             break;
+      case 'lastChecked':     cmp = toMs(a.trackingCheckedAt)      - toMs(b.trackingCheckedAt);      break;
+      case 'shipmentNumber':  cmp = (a.shipmentNumber ?? '').localeCompare(b.shipmentNumber ?? '');  break;
+      case 'containerNumber': cmp = a.containerNumber.localeCompare(b.containerNumber);              break;
+      case 'bookingNumber':   cmp = a.bookingNumber.localeCompare(b.bookingNumber);                  break;
+      case 'carrier':         cmp = a.carrier.localeCompare(b.carrier);                              break;
+      case 'customer':        cmp = a.customer.localeCompare(b.customer);                            break;
+      case 'sapStatus':       cmp = a.sapStatus.localeCompare(b.sapStatus);                          break;
+      case 'suggestedAction': cmp = a.suggestedAction.localeCompare(b.suggestedAction);              break;
+    }
+    return cmp * sign;
+  });
+}
+
 const PRIORITIES: Priority[] = ['High', 'Medium', 'Low'];
 const PRIORITY_COLORS: Record<Priority, string> = {
   High: '#dc2626', Medium: '#d97706', Low: '#16a34a',
@@ -98,6 +141,17 @@ export function ContainerTable({ filters, onSelect }: Props) {
 
   const [priorityAnchor, setPriorityAnchor] = useState<Anchor | null>(null);
   const [reviewAnchor, setReviewAnchor]     = useState<Anchor | null>(null);
+  const [sortKey,  setSortKey]  = useState<SortKey | null>(null);
+  const [sortDir,  setSortDir]  = useState<SortDir>('asc');
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
 
   // Close popovers on outside click
   useEffect(() => {
@@ -123,7 +177,9 @@ export function ContainerTable({ filters, onSelect }: Props) {
     setPriorityAnchor(null);
   };
 
-  const filtered = applyFilters(containers, filters);
+  const filtered = sortKey
+    ? applySort(applyFilters(containers, filters), sortKey, sortDir)
+    : applyFilters(containers, filters);
 
   // ── Empty states ─────────────────────────────────────────────────────────
   if (containers.length === 0) {
@@ -260,12 +316,41 @@ export function ContainerTable({ filters, onSelect }: Props) {
           <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
               <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                {['Priority','Shipment No','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
-                  ...(isAdmin ? ['Uploaded By'] : []),
-                  ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap"
-                    style={{ color: '#64748b' }}>
-                    {h}
+                {([
+                  { label: 'Priority',        key: 'priority'        as SortKey },
+                  { label: 'Shipment No',     key: 'shipmentNumber'  as SortKey },
+                  { label: 'Container',       key: 'containerNumber' as SortKey },
+                  { label: 'Booking',         key: 'bookingNumber'   as SortKey },
+                  { label: 'Carrier',         key: 'carrier'         as SortKey },
+                  { label: 'Customer',        key: 'customer'        as SortKey },
+                  { label: 'SAP Status',      key: 'sapStatus'       as SortKey },
+                  { label: 'SAP ETA',         key: 'sapEta'          as SortKey },
+                  { label: 'Carrier ETA',     key: 'carrierEta'      as SortKey },
+                  { label: 'Last Event',      key: null },
+                  { label: 'Review',          key: 'reviewStatus'    as SortKey },
+                  { label: 'Suggested Action',key: 'suggestedAction' as SortKey },
+                  { label: 'Last Checked',    key: 'lastChecked'     as SortKey },
+                  ...(isAdmin ? [{ label: 'Uploaded By', key: null }] : []),
+                  { label: '', key: null },
+                ] as { label: string; key: SortKey | null }[]).map(col => (
+                  <th key={col.label}
+                    className="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap"
+                    style={{
+                      color: sortKey === col.key ? '#0891b2' : '#64748b',
+                      cursor: col.key ? 'pointer' : 'default',
+                      userSelect: 'none',
+                    }}
+                    onClick={() => col.key && handleSort(col.key)}>
+                    <span className="inline-flex items-center gap-1">
+                      {col.label}
+                      {col.key && (
+                        sortKey === col.key
+                          ? sortDir === 'asc'
+                            ? <ChevronUp size={12} style={{ color: '#0891b2' }} />
+                            : <ChevronDown size={12} style={{ color: '#0891b2' }} />
+                          : <ChevronsUpDown size={11} style={{ color: '#cbd5e1' }} />
+                      )}
+                    </span>
                   </th>
                 ))}
               </tr>
