@@ -335,6 +335,29 @@ def _track_sinay(booking, container, api_key, carrier=""):
             if not norm["currentStatus"] and meta.get("shippingStatus"):
                 norm["currentStatus"] = meta["shippingStatus"].replace("_", " ").title()
 
+            # ── Safety override: if the container is clearly still in transit,
+            # clear any discharge/release dates that were falsely detected from
+            # transshipment events or gate-out-at-origin events.
+            # These signals mean the container has NOT yet reached the final POD.
+            _IN_TRANSIT_SIGNALS = [
+                "loaded on vessel", "loaded on board", "on board", "vessel departure",
+                "vessel departed", "departed from", "gate out origin", "laden",
+                "sailing", "at sea", "stuffed at", "gate in full",
+                "load on vessel", "loaded at", "on vessel",
+            ]
+            _cs = (norm.get("currentStatus") or "").lower()
+            _ss = (meta.get("shippingStatus") or "").lower()
+            # Check both the last-event description and Sinay's own shipping status
+            _clearly_in_transit = (
+                any(sig in _cs for sig in _IN_TRANSIT_SIGNALS)
+                or _ss in ("in_transit", "loaded", "loaded_on_vessel", "vessel_departure",
+                           "departed", "at_sea", "sailing", "on_board")
+            )
+            if _clearly_in_transit:
+                norm["dischargeDate"]   = None
+                norm["releaseDate"]     = None
+                norm["emptyReturnDate"] = None
+
             # ── Location & vessel from last actual event ───────────────────────
             current_location = None
             vessel_name      = None

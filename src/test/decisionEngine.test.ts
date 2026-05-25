@@ -61,6 +61,18 @@ describe('computeDecision — IN_TRANSIT', () => {
 });
 
 describe('computeDecision — DISCHARGED', () => {
+  it('Pending Review when carrier shows in-transit despite SAP Discharged', () => {
+    // e.g. MELG02964500: SAP says Discharged, carrier returns "Loaded On Vessel At Port Of Loading"
+    // → should NOT suggest "Add container released event"
+    const c = makeContainerWithStatus('DISCHARGED', {
+      releaseDate: '2025-06-20',
+      currentStatus: 'Loaded On Vessel At Port Of Loading',
+    });
+    const r = computeDecision(c);
+    expect(r.reviewStatus).toBe('Pending Review');
+    expect(r.suggestedAction).toBe('Review manually');
+  });
+
   it('Action Required when release date present', () => {
     const c = makeContainerWithStatus('DISCHARGED', { releaseDate: '2025-06-20' });
     const r = computeDecision(c);

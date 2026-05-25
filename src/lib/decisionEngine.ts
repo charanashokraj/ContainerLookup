@@ -29,6 +29,23 @@ function isEtaOverdue(etaStr: string | null): boolean {
   }
 }
 
+// Returns true when the carrier's last event clearly shows the container is
+// still sailing and has NOT yet arrived at the final destination.
+// Used to prevent false "Action Required" suggestions when transshipment
+// events (gate-out at origin / mid-leg discharge) have been mis-classified.
+const IN_TRANSIT_SIGNALS = [
+  'loaded on vessel', 'loaded on board', 'on board', 'vessel departure',
+  'vessel departed', 'departed from', 'gate out origin', 'laden',
+  'sailing', 'at sea', 'stuffed at', 'gate in full',
+  'load on vessel', 'loaded at', 'on vessel',
+];
+
+function carrierShowsInTransit(currentStatus: string | null): boolean {
+  if (!currentStatus) return false;
+  const s = currentStatus.toLowerCase();
+  return IN_TRANSIT_SIGNALS.some(sig => s.includes(sig));
+}
+
 export interface DecisionResult {
   reviewStatus: ReviewStatus;
   suggestedAction: SuggestedAction;
@@ -94,6 +111,16 @@ export function computeDecision(record: ContainerRecord): DecisionResult {
   }
 
   if (sapStatus === 'DISCHARGED') {
+    // If carrier shows the container is still sailing, SAP is ahead of reality —
+    // do not suggest release events until the carrier confirms arrival.
+    if (carrierShowsInTransit(ce.currentStatus)) {
+      return {
+        reviewStatus: 'Pending Review',
+        suggestedAction: 'Review manually',
+        suggestedEventDate: null,
+        reason: `Carrier shows container is still in transit ("${ce.currentStatus}") but SAP status is Discharged. Verify the correct status on the carrier website.`,
+      };
+    }
     // Empty returned but no release date — intermediate event missing
     if (ce.emptyReturnDate && !ce.releaseDate) {
       return {
@@ -130,6 +157,14 @@ export function computeDecision(record: ContainerRecord): DecisionResult {
   }
 
   if (sapStatus === 'RELEASED') {
+    if (carrierShowsInTransit(ce.currentStatus)) {
+      return {
+        reviewStatus: 'Pending Review',
+        suggestedAction: 'Review manually',
+        suggestedEventDate: null,
+        reason: `Carrier shows container is still in transit ("${ce.currentStatus}") but SAP status is Released. Verify on carrier website.`,
+      };
+    }
     if (ce.emptyReturnDate) {
       return {
         reviewStatus: 'Action Required',
