@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-05-25T04:20:10.324312+00:00",
+  "updatedAt": "2026-05-25T06:36:47.071853+00:00",
   "containerCount": 2,
   "trackedCount": 2,
-  "skippedCount": 0,
+  "skippedCount": 2,
   "results": {
     "958c586f-9641-4d84-8d8b-671ccfe9497b": {
       "dischargeDate": null,
@@ -21,8 +21,9 @@
       "containerNumber": "CGMU6540930",
       "bookingNumber": "",
       "autoTracked": true,
-      "skipped": false,
-      "error": null
+      "skipped": true,
+      "error": null,
+      "reason": "Checked 2.3h ago (< 3h)"
     },
     "25691e08-c874-4ce4-81c6-0a29fe622b7f": {
       "dischargeDate": null,
@@ -41,8 +42,9 @@
       "containerNumber": "MNBU3735878",
       "bookingNumber": "",
       "autoTracked": true,
-      "skipped": false,
-      "error": null
+      "skipped": true,
+      "error": null,
+      "reason": "Checked 2.3h ago (< 3h)"
     }
   }
 }
