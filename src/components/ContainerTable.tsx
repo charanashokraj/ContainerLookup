@@ -69,23 +69,23 @@ function applyFilters(containers: ContainerRecord[], f: FilterState): ContainerR
 
 const PRIORITIES: Priority[] = ['High', 'Medium', 'Low'];
 const PRIORITY_COLORS: Record<Priority, string> = {
-  High: '#f87171', Medium: '#fbbf24', Low: '#4ade80',
+  High: '#dc2626', Medium: '#d97706', Low: '#16a34a',
 };
 
 const REVIEW_STATUSES: ReviewStatus[] = [
   'Action Required', 'Pending Review', 'No Update Required', 'Auto-Reviewed', 'Completed',
 ];
 const REVIEW_COLORS: Record<ReviewStatus, string> = {
-  'Action Required': '#fb923c',
-  'Pending Review': '#facc15',
-  'No Update Required': '#60a5fa',
-  'Auto-Reviewed': '#22d3ee',
-  'Completed': '#4ade80',
+  'Action Required': '#ea580c',
+  'Pending Review': '#ca8a04',
+  'No Update Required': '#2563eb',
+  'Auto-Reviewed': '#0891b2',
+  'Completed': '#16a34a',
 };
 
 interface Anchor { id: string; x: number; y: number; }
 
-const ETA_CHANGED: React.CSSProperties = { color: '#fb923c', fontWeight: 600 };
+const ETA_CHANGED: React.CSSProperties = { color: '#ea580c', fontWeight: 600 };
 
 export function ContainerTable({ filters, onSelect }: Props) {
   const containers        = useStore(s => s.containers);
@@ -129,13 +129,13 @@ export function ContainerTable({ filters, onSelect }: Props) {
   if (containers.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-28 rounded-2xl"
-        style={{ background: 'rgba(255,255,255,0.025)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+        style={{ background: '#ffffff', border: '2px dashed #e2e8f0' }}>
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-          style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.15)' }}>
-          <Package size={28} style={{ color: '#06b6d4' }} />
+          style={{ background: '#ecfeff', border: '1px solid #67e8f9' }}>
+          <Package size={28} style={{ color: '#0891b2' }} />
         </div>
-        <p className="text-base font-semibold text-white mb-1">No containers loaded</p>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Upload a SAP report to get started</p>
+        <p className="text-base font-semibold mb-1" style={{ color: '#0f172a' }}>No containers loaded</p>
+        <p className="text-sm" style={{ color: '#94a3b8' }}>Upload a SAP report to get started</p>
       </div>
     );
   }
@@ -143,9 +143,9 @@ export function ContainerTable({ filters, onSelect }: Props) {
   if (filtered.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 rounded-2xl"
-        style={{ background: 'rgba(255,255,255,0.025)', border: '1px dashed rgba(255,255,255,0.1)' }}>
-        <p className="text-sm font-medium text-white mb-1">No containers match your filters</p>
-        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Try adjusting or clearing the filters above</p>
+        style={{ background: '#ffffff', border: '2px dashed #e2e8f0' }}>
+        <p className="text-sm font-medium mb-1" style={{ color: '#0f172a' }}>No containers match your filters</p>
+        <p className="text-xs" style={{ color: '#94a3b8' }}>Try adjusting or clearing the filters above</p>
       </div>
     );
   }
@@ -165,17 +165,17 @@ export function ContainerTable({ filters, onSelect }: Props) {
             left: priorityAnchor.x,
             top: priorityAnchor.y,
             zIndex: 9999,
-            background: '#0f172a',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
             borderRadius: 12,
             padding: '10px 12px',
-            boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.15)',
             minWidth: 180,
           }}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>SET PRIORITY</span>
+            <span className="text-xs font-semibold" style={{ color: '#64748b' }}>SET PRIORITY</span>
             <button onClick={() => setPriorityAnchor(null)}>
-              <X size={12} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              <X size={12} style={{ color: '#94a3b8' }} />
             </button>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -185,20 +185,20 @@ export function ContainerTable({ filters, onSelect }: Props) {
                 onClick={() => { setManualPriority(priorityTarget.id, p); setPriorityAnchor(null); }}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-left"
                 style={{
-                  background: priorityTarget.priority === p ? `${PRIORITY_COLORS[p]}22` : 'rgba(255,255,255,0.03)',
+                  background: priorityTarget.priority === p ? `${PRIORITY_COLORS[p]}15` : '#f8fafc',
                   color: PRIORITY_COLORS[p],
-                  border: priorityTarget.priority === p ? `1px solid ${PRIORITY_COLORS[p]}55` : '1px solid transparent',
+                  border: priorityTarget.priority === p ? `1px solid ${PRIORITY_COLORS[p]}50` : '1px solid #e2e8f0',
                 }}>
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PRIORITY_COLORS[p] }} />
                 {p}
-                {priorityTarget.manualPriority === p && <span className="ml-auto text-xs opacity-50">manual</span>}
+                {priorityTarget.manualPriority === p && <span className="ml-auto text-xs" style={{ color: '#94a3b8' }}>manual</span>}
               </button>
             ))}
             {(priorityTarget.manualPriority ?? null) !== null && (
               <button
                 onClick={() => { setManualPriority(priorityTarget.id, null); setPriorityAnchor(null); }}
                 className="mt-1 px-3 py-1 rounded-lg text-xs text-center transition-all"
-                style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                style={{ background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0' }}>
                 Reset to auto
               </button>
             )}
@@ -215,17 +215,17 @@ export function ContainerTable({ filters, onSelect }: Props) {
             left: reviewAnchor.x,
             top: reviewAnchor.y,
             zIndex: 9999,
-            background: '#0f172a',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
             borderRadius: 12,
             padding: '10px 12px',
-            boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.15)',
             minWidth: 200,
           }}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>SET REVIEW STATUS</span>
+            <span className="text-xs font-semibold" style={{ color: '#64748b' }}>SET REVIEW STATUS</span>
             <button onClick={() => setReviewAnchor(null)}>
-              <X size={12} style={{ color: 'rgba(255,255,255,0.3)' }} />
+              <X size={12} style={{ color: '#94a3b8' }} />
             </button>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -235,9 +235,9 @@ export function ContainerTable({ filters, onSelect }: Props) {
                 onClick={() => { setReviewStatus(reviewTarget.id, s); setReviewAnchor(null); }}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-left"
                 style={{
-                  background: reviewTarget.reviewStatus === s ? `${REVIEW_COLORS[s]}22` : 'rgba(255,255,255,0.03)',
+                  background: reviewTarget.reviewStatus === s ? `${REVIEW_COLORS[s]}15` : '#f8fafc',
                   color: REVIEW_COLORS[s],
-                  border: reviewTarget.reviewStatus === s ? `1px solid ${REVIEW_COLORS[s]}55` : '1px solid transparent',
+                  border: reviewTarget.reviewStatus === s ? `1px solid ${REVIEW_COLORS[s]}50` : '1px solid #e2e8f0',
                 }}>
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: REVIEW_COLORS[s] }} />
                 {s}
@@ -245,7 +245,7 @@ export function ContainerTable({ filters, onSelect }: Props) {
             ))}
           </div>
           {(reviewTarget.reviewStatusUserSet ?? false) && (
-            <p className="mt-2 text-xs text-center" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            <p className="mt-2 text-xs text-center" style={{ color: '#94a3b8' }}>
               Manually set — auto-tracking won't override
             </p>
           )}
@@ -254,17 +254,17 @@ export function ContainerTable({ filters, onSelect }: Props) {
 
       {/* ── Main table ───────────────────────────────────────────────────── */}
       <div className="rounded-2xl overflow-hidden"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
+        style={{ background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         {/* overflow-x + overflow-y both set so thead position:sticky works within this container */}
         <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100vh - 310px)' }}>
           <table className="w-full text-sm" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
-            <thead style={{ position: 'sticky', top: 0, zIndex: 10, backdropFilter: 'blur(16px)' }}>
-              <tr style={{ background: 'rgba(15,23,42,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
                 {['Priority','Shipment No','Container','Booking','Carrier','Customer','SAP Status','SAP ETA','Carrier ETA','Last Event','Review','Suggested Action','Last Checked',
                   ...(isAdmin ? ['Uploaded By'] : []),
                   ''].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold tracking-wide whitespace-nowrap"
-                    style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    style={{ color: '#64748b' }}>
                     {h}
                   </th>
                 ))}
@@ -280,11 +280,11 @@ export function ContainerTable({ filters, onSelect }: Props) {
                 return (
                   <tr key={c.id}
                     style={{
-                      borderBottom: idx < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                      background: isUrgent ? 'rgba(249,115,22,0.04)' : isPending ? 'rgba(234,179,8,0.03)' : 'transparent',
+                      borderBottom: idx < filtered.length - 1 ? '1px solid #f1f5f9' : 'none',
+                      background: isUrgent ? '#fff7ed' : isPending ? '#fefce8' : '#ffffff',
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = isUrgent ? 'rgba(249,115,22,0.07)' : 'rgba(255,255,255,0.03)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = isUrgent ? 'rgba(249,115,22,0.04)' : isPending ? 'rgba(234,179,8,0.03)' : 'transparent')}>
+                    onMouseEnter={e => (e.currentTarget.style.background = isUrgent ? '#ffedd5' : '#f8fafc')}
+                    onMouseLeave={e => (e.currentTarget.style.background = isUrgent ? '#fff7ed' : isPending ? '#fefce8' : '#ffffff')}>
 
                     {/* Priority — clickable */}
                     <td className="px-4 py-3">
@@ -297,73 +297,73 @@ export function ContainerTable({ filters, onSelect }: Props) {
 
                     {/* Shipment number */}
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                      <span className="font-mono text-xs" style={{ color: '#64748b' }}>
                         {c.shipmentNumber || '–'}
                       </span>
                     </td>
 
                     {/* Container number */}
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs font-semibold" style={{ color: '#67e8f9' }}>
+                      <span className="font-mono text-xs font-semibold" style={{ color: '#0891b2' }}>
                         {c.containerNumber || '–'}
                       </span>
                     </td>
 
                     {/* Booking */}
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      <span className="font-mono text-xs" style={{ color: '#475569' }}>
                         {c.bookingNumber || '–'}
                       </span>
                     </td>
 
                     {/* Carrier */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                      <span className="text-xs font-semibold" style={{ color: '#334155' }}>
                         {c.carrier || '–'}
                       </span>
                     </td>
 
                     {/* Customer */}
                     <td className="px-4 py-3 max-w-32">
-                      <span className="text-xs truncate block" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      <span className="text-xs truncate block" style={{ color: '#475569' }}>
                         {c.customer || '–'}
                       </span>
                     </td>
 
                     {/* SAP Status */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                      <span className="text-xs font-medium" style={{ color: '#475569' }}>
                         {c.sapStatus || '–'}
                       </span>
                     </td>
 
                     {/* SAP ETA */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{fmt(c.sapEta)}</span>
+                      <span className="text-xs" style={{ color: '#475569' }}>{fmt(c.sapEta)}</span>
                     </td>
 
                     {/* Carrier ETA */}
                     <td className="px-4 py-3 whitespace-nowrap">
                       {c.carrierEta ? (
-                        <span className="text-xs" style={etaMismatch ? ETA_CHANGED : { color: 'rgba(255,255,255,0.5)' }}>
+                        <span className="text-xs" style={etaMismatch ? ETA_CHANGED : { color: '#475569' }}>
                           {fmt(c.carrierEta)}
                           {etaMismatch && <span className="ml-1 text-xs">↑</span>}
                         </span>
-                      ) : <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>–</span>}
+                      ) : <span className="text-xs" style={{ color: '#cbd5e1' }}>–</span>}
                     </td>
 
                     {/* Last Carrier Event */}
                     <td className="px-4 py-3" style={{ minWidth: 180, maxWidth: 260 }}>
-                      <p className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.6)', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      <p className="text-xs leading-snug" style={{ color: '#475569', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                         {c.carrierEvents.lastEventDescription ?? '–'}
                       </p>
                       {c.carrierEvents.currentLocation && (
-                        <p className="flex items-center gap-1 mt-0.5 text-xs" style={{ color: 'rgba(6,182,212,0.7)', whiteSpace: 'normal' }}>
+                        <p className="flex items-center gap-1 mt-0.5 text-xs" style={{ color: '#0891b2', whiteSpace: 'normal' }}>
                           <MapPin size={10} className="shrink-0" />{c.carrierEvents.currentLocation}
                         </p>
                       )}
                       {c.carrierEvents.vesselName && !c.carrierEvents.currentLocation && (
-                        <p className="flex items-center gap-1 mt-0.5 text-xs" style={{ color: 'rgba(6,182,212,0.6)', whiteSpace: 'normal' }}>
+                        <p className="flex items-center gap-1 mt-0.5 text-xs" style={{ color: '#0891b2', whiteSpace: 'normal' }}>
                           <Ship size={10} className="shrink-0" />{c.carrierEvents.vesselName}
                         </p>
                       )}
@@ -380,14 +380,14 @@ export function ContainerTable({ filters, onSelect }: Props) {
 
                     {/* Suggested Action */}
                     <td className="px-4 py-3" style={{ minWidth: 160, maxWidth: 220 }}>
-                      <span className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.5)', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      <span className="text-xs leading-snug" style={{ color: '#64748b', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                         {c.suggestedAction}
                       </span>
                     </td>
 
                     {/* Last Checked */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      <span className="text-xs" style={{ color: '#94a3b8' }}>
                         {c.trackingCheckedAt ? fmtDateTime(c.trackingCheckedAt) : '–'}
                       </span>
                     </td>
@@ -396,7 +396,7 @@ export function ContainerTable({ filters, onSelect }: Props) {
                     {isAdmin && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="flex items-center gap-1 text-xs"
-                          style={{ color: c.uploadedBy ? 'rgba(167,139,250,0.8)' : 'rgba(255,255,255,0.2)' }}>
+                          style={{ color: c.uploadedBy ? '#7c3aed' : '#cbd5e1' }}>
                           {c.uploadedBy && <User size={10} />}
                           {c.uploadedBy || '–'}
                         </span>
@@ -406,7 +406,7 @@ export function ContainerTable({ filters, onSelect }: Props) {
                     {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <IconBtn title="View details" onClick={() => onSelect(c)} color="#67e8f9">
+                        <IconBtn title="View details" onClick={() => onSelect(c)} color="#0891b2">
                           <Eye size={14} />
                         </IconBtn>
 
@@ -414,26 +414,26 @@ export function ContainerTable({ filters, onSelect }: Props) {
                           <a href={trackingUrl} target="_blank" rel="noopener noreferrer"
                             title="Open carrier tracking"
                             className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
-                            style={{ color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.15)'; e.currentTarget.style.color = '#60a5fa'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; }}>
+                            style={{ color: '#94a3b8', background: '#f1f5f9' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.color = '#2563eb'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#94a3b8'; }}>
                             <ExternalLink size={14} />
                           </a>
                         )}
 
                         {c.reviewStatus === 'Action Required' && (
-                          <IconBtn title="Approve update" onClick={() => approveUpdate(c.id, authUser)} color="#4ade80">
+                          <IconBtn title="Approve update" onClick={() => approveUpdate(c.id, authUser)} color="#16a34a">
                             <CheckCircle size={14} />
                           </IconBtn>
                         )}
 
                         {c.reviewStatus !== 'Completed' && !c.markedChecked && (
-                          <IconBtn title="Mark as checked" onClick={() => markChecked(c.id, authUser)} color="rgba(255,255,255,0.5)">
+                          <IconBtn title="Mark as checked" onClick={() => markChecked(c.id, authUser)} color="#64748b">
                             <RefreshCw size={14} />
                           </IconBtn>
                         )}
 
-                        <IconBtn title="Flag for review" color="#facc15"
+                        <IconBtn title="Flag for review" color="#ca8a04"
                           onClick={() => {
                             const reason = prompt('Reason for pending review:');
                             if (reason) useStore.getState().markPendingReview(c.id, reason);
@@ -451,13 +451,13 @@ export function ContainerTable({ filters, onSelect }: Props) {
 
         {/* Footer */}
         <div className="px-5 py-2.5 flex items-center justify-between"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          style={{ borderTop: '1px solid #f1f5f9' }}>
+          <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>
             {filtered.length} of {containers.length} containers
           </span>
           {filtered.length < containers.length && (
             <span className="text-xs px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(6,182,212,0.1)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.2)' }}>
+              style={{ background: '#ecfeff', color: '#0891b2', border: '1px solid #67e8f9' }}>
               {containers.length - filtered.length} filtered out
             </span>
           )}
@@ -473,9 +473,9 @@ function IconBtn({ children, title, onClick, color }: {
   return (
     <button title={title} onClick={onClick}
       className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
-      style={{ color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)' }}
-      onMouseEnter={e => { e.currentTarget.style.background = `${color}18`; e.currentTarget.style.color = color; }}
-      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; }}>
+      style={{ color: '#94a3b8', background: '#f1f5f9' }}
+      onMouseEnter={e => { e.currentTarget.style.background = `${color}15`; e.currentTarget.style.color = color; }}
+      onMouseLeave={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#94a3b8'; }}>
       {children}
     </button>
   );

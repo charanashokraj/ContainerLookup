@@ -135,11 +135,11 @@ body {
   background-size: 60px 60px;
 }
 
-/* ── Custom scrollbars — thin, dark, theme-matched ─────────────────────────── */
+/* ── Custom scrollbars — thin, light theme ──────────────────────────────────── */
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.12) transparent;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 *::-webkit-scrollbar {
@@ -152,41 +152,39 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
+  background: #cbd5e1;
   border-radius: 99px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(6,182,212,0.35);
+  background: #0891b2;
 }
 
 *::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-/* ── Select / option dark theme ────────────────────────────────────────────── */
-/* Native <option> elements don't inherit custom select styles across browsers  */
+/* ── Select / option light theme ────────────────────────────────────────────── */
 select option {
-  background: #1e293b;
-  color: #f1f5f9;
+  background: #ffffff;
+  color: #0f172a;
 }
 select option:checked,
 select option:hover {
-  background: #0e7490;
-  color: #ffffff;
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
-/* Input styles for dark forms */
+/* Input styles */
 .dark-input {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: white;
-  transition: border-color 0.2s, background 0.2s;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.dark-input::placeholder { color: rgba(255,255,255,0.3); }
+.dark-input::placeholder { color: #94a3b8; }
 .dark-input:focus {
   outline: none;
-  border-color: rgba(6,182,212,0.6);
-  background: rgba(255,255,255,0.09);
-  box-shadow: 0 0 0 3px rgba(6,182,212,0.1);
+  border-color: #0891b2;
+  box-shadow: 0 0 0 3px rgba(8,145,178,0.12);
 }

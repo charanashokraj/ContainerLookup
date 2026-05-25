@@ -2,25 +2,25 @@ import { Zap } from 'lucide-react';
 import type { Priority, ReviewStatus } from '../types';
 
 const PRIORITY: Record<Priority, React.CSSProperties> = {
-  High:   { background: 'rgba(239,68,68,0.12)',  border: '1px solid rgba(239,68,68,0.3)',  color: '#f87171' },
-  Medium: { background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' },
-  Low:    { background: 'rgba(34,197,94,0.10)',  border: '1px solid rgba(34,197,94,0.25)', color: '#4ade80' },
+  High:   { background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626' },
+  Medium: { background: '#fffbeb', border: '1px solid #fcd34d', color: '#d97706' },
+  Low:    { background: '#f0fdf4', border: '1px solid #86efac', color: '#16a34a' },
 };
 
 const STATUS: Record<ReviewStatus, React.CSSProperties> = {
-  'Action Required':    { background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' },
-  'Pending Review':     { background: 'rgba(234,179,8,0.12)',  border: '1px solid rgba(234,179,8,0.3)',  color: '#facc15' },
-  'No Update Required': { background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#60a5fa' },
-  'Completed':          { background: 'rgba(34,197,94,0.12)',  border: '1px solid rgba(34,197,94,0.3)',  color: '#4ade80' },
-  'Auto-Reviewed':      { background: 'rgba(6,182,212,0.12)',  border: '1px solid rgba(6,182,212,0.3)',  color: '#22d3ee' },
+  'Action Required':    { background: '#fff7ed', border: '1px solid #fdba74', color: '#ea580c' },
+  'Pending Review':     { background: '#fefce8', border: '1px solid #fde047', color: '#ca8a04' },
+  'No Update Required': { background: '#eff6ff', border: '1px solid #93c5fd', color: '#2563eb' },
+  'Completed':          { background: '#f0fdf4', border: '1px solid #86efac', color: '#16a34a' },
+  'Auto-Reviewed':      { background: '#ecfeff', border: '1px solid #67e8f9', color: '#0891b2' },
 };
 
 const DOT: Record<ReviewStatus, string> = {
-  'Action Required':    '#fb923c',
-  'Pending Review':     '#facc15',
-  'No Update Required': '#60a5fa',
-  'Completed':          '#4ade80',
-  'Auto-Reviewed':      '#22d3ee',
+  'Action Required':    '#ea580c',
+  'Pending Review':     '#ca8a04',
+  'No Update Required': '#2563eb',
+  'Completed':          '#16a34a',
+  'Auto-Reviewed':      '#0891b2',
 };
 
 interface PriorityBadgeProps {

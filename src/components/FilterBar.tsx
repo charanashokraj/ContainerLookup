@@ -9,9 +9,9 @@ interface Props {
 }
 
 const DARK_SELECT: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  color: 'white',
+  background: '#ffffff',
+  border: '1px solid #e2e8f0',
+  color: '#0f172a',
   borderRadius: 8,
   padding: '7px 10px',
   fontSize: 13,
@@ -19,10 +19,11 @@ const DARK_SELECT: React.CSSProperties = {
   cursor: 'pointer',
   appearance: 'none',
   WebkitAppearance: 'none',
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'right 8px center',
   paddingRight: 28,
+  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
 };
 
 export function FilterBar({ filters, onChange }: Props) {
@@ -45,18 +46,18 @@ export function FilterBar({ filters, onChange }: Props) {
 
   return (
     <div className="rounded-2xl mb-4 p-4"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', backdropFilter: 'blur(12px)' }}>
+      style={{ background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
       <div className="flex items-center gap-2.5 flex-wrap">
 
         {/* Search */}
         <div className="relative flex-1 min-w-52">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.3)' }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#94a3b8' }} />
           <input
             type="text"
             placeholder="Search container, booking, customer…"
             value={filters.search}
             onChange={e => set('search', e.target.value)}
-            className="dark-input w-full pl-8 pr-4 py-2 rounded-lg text-sm text-white"
+            className="dark-input w-full pl-8 pr-4 py-2 rounded-lg text-sm"
           />
         </div>
 
@@ -115,18 +116,18 @@ export function FilterBar({ filters, onChange }: Props) {
         {/* Filter indicator + clear */}
         <div className="flex items-center gap-2 ml-auto">
           {activeCount > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-              style={{ background: 'rgba(6,182,212,0.15)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.25)' }}>
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+              style={{ background: '#ecfeff', color: '#0891b2', border: '1px solid #67e8f9' }}>
               {activeCount} active
             </span>
           )}
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: '#94a3b8' }}>
             <SlidersHorizontal size={12} /> Filters
           </div>
           {activeCount > 0 && (
             <button onClick={clearAll}
               className="flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg"
-              style={{ color: '#f87171', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+              style={{ color: '#dc2626', background: '#fef2f2', border: '1px solid #fca5a5' }}>
               <X size={11} /> Clear
             </button>
           )}
