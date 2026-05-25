@@ -337,17 +337,17 @@ export function ContainerTable({ filters, onSelect }: Props) {
                     </td>
 
                     {/* Last Carrier Event */}
-                    <td className="px-4 py-3 max-w-52">
-                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    <td className="px-4 py-3" style={{ minWidth: 180, maxWidth: 260 }}>
+                      <p className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.6)', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                         {c.carrierEvents.lastEventDescription ?? '–'}
                       </p>
                       {c.carrierEvents.currentLocation && (
-                        <p className="flex items-center gap-1 mt-0.5 text-xs truncate" style={{ color: 'rgba(6,182,212,0.7)' }}>
+                        <p className="flex items-center gap-1 mt-0.5 text-xs" style={{ color: 'rgba(6,182,212,0.7)', whiteSpace: 'normal' }}>
                           <MapPin size={10} className="shrink-0" />{c.carrierEvents.currentLocation}
                         </p>
                       )}
                       {c.carrierEvents.vesselName && !c.carrierEvents.currentLocation && (
-                        <p className="flex items-center gap-1 mt-0.5 text-xs truncate" style={{ color: 'rgba(6,182,212,0.6)' }}>
+                        <p className="flex items-center gap-1 mt-0.5 text-xs" style={{ color: 'rgba(6,182,212,0.6)', whiteSpace: 'normal' }}>
                           <Ship size={10} className="shrink-0" />{c.carrierEvents.vesselName}
                         </p>
                       )}
@@ -363,8 +363,8 @@ export function ContainerTable({ filters, onSelect }: Props) {
                     </td>
 
                     {/* Suggested Action */}
-                    <td className="px-4 py-3 max-w-44">
-                      <span className="text-xs truncate block" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    <td className="px-4 py-3" style={{ minWidth: 160, maxWidth: 220 }}>
+                      <span className="text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.5)', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                         {c.suggestedAction}
                       </span>
                     </td>
