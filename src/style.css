@@ -164,6 +164,18 @@ body {
   background: transparent;
 }
 
+/* ── Select / option dark theme ────────────────────────────────────────────── */
+/* Native <option> elements don't inherit custom select styles across browsers  */
+select option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+select option:checked,
+select option:hover {
+  background: #0e7490;
+  color: #ffffff;
+}
+
 /* Input styles for dark forms */
 .dark-input {
   background: rgba(255,255,255,0.06);
