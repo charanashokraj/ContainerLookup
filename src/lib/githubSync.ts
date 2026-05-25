@@ -92,8 +92,8 @@ export interface AutoTrackingFile {
 
 export async function fetchAutoTracking(baseUrl: string): Promise<AutoTrackingFile | null> {
   try {
-    // Strip trailing slash and append path
-    const url = baseUrl.replace(/\/$/, '') + '/auto-tracking.json';
+    // Append cache-busting timestamp — raw.githubusercontent.com CDN ignores cache: 'no-store'
+    const url = `${baseUrl.replace(/\/$/, '')}/auto-tracking.json?t=${Date.now()}`;
     const resp = await fetch(url, { cache: 'no-store' });
     if (!resp.ok) return null;
     return await resp.json();

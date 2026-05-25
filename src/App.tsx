@@ -166,20 +166,19 @@ function MainApp() {
       return;
     }
 
-    // Poll raw.githubusercontent.com directly — results appear as soon as the
-    // tracking workflow commits, without waiting for a GitHub Pages deploy.
-    const rawBase  = `https://raw.githubusercontent.com/${settings.owner}/${settings.repo}/main/public`;
-    const sinceIso = lastAutoTrackAt ?? new Date(0).toISOString();
+    const rawBase = `https://raw.githubusercontent.com/${settings.owner}/${settings.repo}/main/public`;
+    // Use a timestamp slightly before now so we only accept results from THIS run
+    const sinceIso = new Date(Date.now() - 5000).toISOString();
 
     const COOLDOWN = 2 * 60 * 1000;
     if (Date.now() - lastTriggerRef.current < COOLDOWN) {
       setCheckPhase('waiting');
       setCheckMessage('Workflow already triggered — checking for latest results…');
-      const data = await pollForUpdatedResults(rawBase, sinceIso, 10 * 60 * 1000, 30_000);
+      const data = await pollForUpdatedResults(rawBase, sinceIso, 12 * 60 * 1000, 20_000);
       if (data) {
         mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
         setCheckPhase('done');
-        setCheckMessage(`Done — ${data.trackedCount} containers updated.`);
+        setCheckMessage(`Done — ${data.trackedCount} containers checked.`);
       } else {
         setCheckPhase('done');
         setCheckMessage('Still running. Results will load automatically when ready.');
@@ -189,20 +188,33 @@ function MainApp() {
     }
 
     try {
+      // Step 1 — sync the full container list to GitHub so the workflow sees ALL containers
       setCheckPhase('triggering');
-      setCheckMessage('Triggering GitHub Actions workflow…');
-      await triggerTrackingWorkflow(settings, false);
+      setCheckMessage(`Syncing ${containers.length} containers to GitHub…`);
+      try {
+        const { syncContainersToGithub } = await import('./lib/githubSync');
+        await syncContainersToGithub(settings, containers);
+      } catch (syncErr) {
+        // Non-fatal — workflow will use whatever data/containers.json already has
+        console.warn('[Check All] Sync failed:', syncErr);
+        setCheckMessage('Sync partial — triggering workflow with existing container list…');
+        await new Promise(r => setTimeout(r, 1500));
+      }
+
+      // Step 2 — trigger the workflow with force_all=true so nothing is skipped
+      setCheckMessage('Triggering tracking workflow (force refresh)…');
+      await triggerTrackingWorkflow(settings, true);  // ← always force re-check on manual run
       lastTriggerRef.current = Date.now();
 
       setCheckPhase('waiting');
-      setCheckMessage('Workflow running — typically 5–8 min. Checking every 30s…');
+      setCheckMessage(`Tracking ${containers.length} containers — typically 3–8 min…`);
 
-      // 12-min window covers tracking script (3–5 min) + git commit. No deploy wait.
-      const data = await pollForUpdatedResults(rawBase, sinceIso, 12 * 60 * 1000, 30_000);
+      // Step 3 — poll until the workflow commits updated results
+      const data = await pollForUpdatedResults(rawBase, sinceIso, 12 * 60 * 1000, 20_000);
       if (data) {
         mergeAutoTracking(data.results, data.updatedAt, data.trackedCount);
         setCheckPhase('done');
-        setCheckMessage(`Done — ${data.trackedCount} containers updated.`);
+        setCheckMessage(`Done — ${data.trackedCount} containers checked.`);
       } else {
         setCheckPhase('done');
         setCheckMessage('Tracking still running. Results will load on next visit.');
