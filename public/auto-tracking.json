@@ -1,1144 +1,640 @@
 {
-  "updatedAt": "2026-06-11T22:05:46.945463+00:00",
-  "containerCount": 142,
+  "updatedAt": "2026-06-12T00:20:01.377044+00:00",
+  "containerCount": 79,
   "trackedCount": 0,
   "skippedCount": 0,
   "results": {
-    "a018b028-eaca-451d-938b-d426290df55c": {
+    "339a6ac3-336a-4b38-a329-97b33cb22e80": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.191074+00:00",
-      "containerNumber": "CGMU5142124",
-      "bookingNumber": "MBE0515698",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "401b9fbf-5daa-4cf8-8549-ee296177bc28": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.203836+00:00",
-      "containerNumber": "SEGU9446760",
-      "bookingNumber": "MBE0517071",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "24cfe0da-7fb6-4c56-b99b-0068179a901d": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.236888+00:00",
-      "containerNumber": "CXRU1401322",
-      "bookingNumber": "EBKG14852456",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "1c529eda-43e4-4d09-a4a3-2b9a9b3afb63": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.256170+00:00",
-      "containerNumber": "CXRU1423759",
-      "bookingNumber": "EBKG14928595",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "e538c8ef-93ca-4e73-836e-65e58370fd20": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.259676+00:00",
-      "containerNumber": "CGMU5196563",
-      "bookingNumber": "MBE0515700",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "8ce1ea39-5431-4d58-9997-4ed1b202a01c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.279205+00:00",
-      "containerNumber": "TRIU8039660",
-      "bookingNumber": "MBE0516948",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "137d1482-b189-4d4c-be93-14605a7cc766": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.322832+00:00",
-      "containerNumber": "TTNU8950440",
-      "bookingNumber": "MBE0517465",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "2e3f4694-cfa0-416d-ba7d-65c679291629": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.327605+00:00",
-      "containerNumber": "CGMU5239618",
-      "bookingNumber": "MBE0515309",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "1333249b-1e36-4f2e-907a-ecdcdb2a85d9": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.329304+00:00",
-      "containerNumber": "SZLU9643037",
-      "bookingNumber": "MBE0513864",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "04c53bb3-f358-4249-89d0-e6ebff55c4ed": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.356213+00:00",
-      "containerNumber": "CGMU5222723",
-      "bookingNumber": "MBE0515312",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "49e39c12-8dd3-435d-975e-c124e0b35c3a": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.750336+00:00",
-      "containerNumber": "TTNU8703179",
-      "bookingNumber": "MBE0517468",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "543cb1f4-51b3-437a-b540-4e6dbf76c6c5": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.757115+00:00",
-      "containerNumber": "CGMU5224048",
-      "bookingNumber": "MBE0517467",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "7fda96eb-b3ab-4ad0-92c3-fb0f3f0c1169": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.765047+00:00",
-      "containerNumber": "TTNU8444062",
-      "bookingNumber": "MBE0519064",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "1c4424d3-9619-46d5-945e-29b665a4633e": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.781491+00:00",
-      "containerNumber": "SEGU9711251",
-      "bookingNumber": "MBE0518103",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "2afbe28b-696b-44cb-b7c4-d93309a4c9b2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.808091+00:00",
-      "containerNumber": "CGMU5094221",
-      "bookingNumber": "MBE0519624",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "2a5f1868-585e-4c13-8316-819b268cc3d8": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.833659+00:00",
-      "containerNumber": "CGMU5089014",
-      "bookingNumber": "MBE0520375",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "200ddafd-7174-43cb-817c-f04a533f4a02": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.847649+00:00",
-      "containerNumber": "BMOU9784034",
-      "bookingNumber": "MBE0519066",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "0746bdf9-607d-41e1-b911-01834f1bd7ca": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.880195+00:00",
-      "containerNumber": "FBIU5105240",
-      "bookingNumber": "MBE0520456",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "b782a98f-00b5-451a-89b8-e5f7ab96a52b": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.917742+00:00",
-      "containerNumber": "CGMU5467412",
-      "bookingNumber": "MBE0520433",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "35669574-6b77-448a-9777-2c9b639cd267": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:39.986759+00:00",
-      "containerNumber": "BEAU9703233",
-      "bookingNumber": "MBE0519698",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "7379b05a-2439-47df-acfe-9642a54fa95a": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.261414+00:00",
-      "containerNumber": "CGMU5799042",
-      "bookingNumber": "MBE0520458",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "ba2736b4-1d0c-4cdd-890e-ad916e18eeca": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.319252+00:00",
-      "containerNumber": "TGHU9974528",
-      "bookingNumber": "EBKG14649791",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "d8fd8fee-e26c-4656-812d-35d622a89545": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.322227+00:00",
-      "containerNumber": "TEMU9298782",
-      "bookingNumber": "EBKG14510682",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "44519421-be66-4480-9b36-3a32f7484f4f": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.325311+00:00",
-      "containerNumber": "AMCU9306870",
-      "bookingNumber": "MBE0521789",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "29f178ba-1da5-4fa3-b028-6ad31a0c4788": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.415991+00:00",
-      "containerNumber": "CXRU1398091",
-      "bookingNumber": "EBKG14788647",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "3a1495cd-3304-42e8-87d7-66ad4b0a95f5": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.419514+00:00",
-      "containerNumber": "TRIU8591643",
-      "bookingNumber": "EBKG14910154",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "b2a37d4d-b662-4cdf-8bb7-1161aeeffac1": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.424754+00:00",
-      "containerNumber": "CXRU1464001",
-      "bookingNumber": "EBKG14788675",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "4861a807-032b-4749-bfec-51e9f9878607": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.430364+00:00",
-      "containerNumber": "CRSU6063574",
-      "bookingNumber": "EBKG14788722",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "9b098290-81bf-44f5-ba17-3b540b68d407": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.512534+00:00",
-      "containerNumber": "SEGU9448232",
-      "bookingNumber": "MBE0520135",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "b1e48b0c-c99c-4b8d-a2e6-4e0b488049dd": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.624924+00:00",
-      "containerNumber": "CGMU5453635",
-      "bookingNumber": "MBE0514572",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "0ab62a22-ffa8-4290-96e0-478112c16e37": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.833598+00:00",
-      "containerNumber": "TTNU8880195",
-      "bookingNumber": "MBE0521934",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "c9ea0557-8f26-4426-b244-c34d6cb3c559": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.877567+00:00",
-      "containerNumber": "CGMU5521160",
-      "bookingNumber": "MBE0522847",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "57ba4143-3335-4dd1-892d-167c6dc74175": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.918676+00:00",
-      "containerNumber": "MSDU9859403",
-      "bookingNumber": "EBKG15269946",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "2d1ffcc0-478c-453e-925c-2220a2ee5065": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:40.919786+00:00",
-      "containerNumber": "OTPU6130743",
-      "bookingNumber": "EBKG15458045",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "7832e4be-b3bc-4a1b-9911-b3fcd8fef09c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.000557+00:00",
-      "containerNumber": "CXRU1485684",
-      "bookingNumber": "6436655130",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "0b65de01-6f24-41cb-80de-c61342c1e1f2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.016813+00:00",
-      "containerNumber": "FBIU5571736",
-      "bookingNumber": "6435976140",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "69506eaf-90a5-49e4-934c-c0355bf8bd12": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.044761+00:00",
-      "containerNumber": "CGMU9325761",
-      "bookingNumber": "SSZ1711736",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "cd4e77bf-fa6a-4e49-b03a-7e3d027f93a5": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.054918+00:00",
-      "containerNumber": "TCLU1255895",
-      "bookingNumber": "SSZ1722244",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "ff336aa7-9bd5-406a-80db-afbfc5cf77e2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.067688+00:00",
-      "containerNumber": "SZLU9679472",
-      "bookingNumber": "6435977350",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "3f3c6b9a-2a82-43c9-9f5d-6cc0afe43400": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.158605+00:00",
-      "containerNumber": "CGMU6564401",
-      "bookingNumber": "SSZ1710017",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "a2e030b2-7c5f-4824-a113-2d3a608b8ea1": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.359594+00:00",
-      "containerNumber": "FBIU5752246",
-      "bookingNumber": "6435977740",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "7358b67d-b138-4b24-b4c4-e3e9502cac0c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.434953+00:00",
-      "containerNumber": "CXRU1489669",
-      "bookingNumber": "6436655140",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "a05eb2ae-08d2-4347-9c17-cde8fff873e6": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.445181+00:00",
-      "containerNumber": "SEGU9531476",
-      "bookingNumber": "SSZ1722245",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "38a0eec1-90df-4340-8431-c0f757ad6345": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.477740+00:00",
-      "containerNumber": "OERU4323799",
-      "bookingNumber": "6435691680",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "0e093cd9-3f07-43a0-b475-c9d5e8fe0c04": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.525142+00:00",
-      "containerNumber": "SZLU9624757",
-      "bookingNumber": "SSZ1722243",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "87cfa3d4-71b5-447b-845d-855365261373": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.564648+00:00",
-      "containerNumber": "CGMU5243330",
-      "bookingNumber": "SSZ1722234",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "6c29b2fd-e59b-4c6e-b65e-6803503afbf4": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.609427+00:00",
-      "containerNumber": "FSCU5963975",
-      "bookingNumber": "SSZ1710012",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "53b987cb-8d63-4d44-a439-7571917325c4": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.614794+00:00",
-      "containerNumber": "FBIU5662266",
-      "bookingNumber": "6435977750",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "40576458-4a52-4e65-98ef-c35660f6d4e7": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.617550+00:00",
-      "containerNumber": "CGMU6571735",
-      "bookingNumber": "SSZ1711737",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "7285bf2f-49d3-4219-a20f-b2673aab58f6": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.672692+00:00",
-      "containerNumber": "FBIU5660129",
-      "bookingNumber": "6435977260",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "bcc1abcc-394e-434a-a5ed-5bb785e9d4be": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:41.922330+00:00",
-      "containerNumber": "OERU4199369",
-      "bookingNumber": "6435976110",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "a814601a-8b4d-41a4-9d02-0065d90add22": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.145200+00:00",
-      "containerNumber": "TCLU1268547",
-      "bookingNumber": "SSZ1711734",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "b5ee10cc-192c-4673-9910-f1ebb386fa17": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.148426+00:00",
-      "containerNumber": "CGMU5111118",
-      "bookingNumber": "SSZ1711731",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "2857156c-1b21-4949-934e-1d2881394670": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.155019+00:00",
-      "containerNumber": "FBIU5080985",
-      "bookingNumber": "SSZ1711725",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "b45666c4-7f03-4378-b53e-46c9efd85ec5": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.157293+00:00",
-      "containerNumber": "SEKU9134133",
-      "bookingNumber": "SSZ1711728",
-      "error": "Not found via available APIs for carrier 'CMA CGM - INTERTRANS'"
-    },
-    "379899b7-cbef-40ff-93be-d7097fc8b62a": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.174956+00:00",
-      "containerNumber": "FBIU5052448",
-      "bookingNumber": "6435976100",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "020fcc2b-9ce0-4829-92ce-ae10370ca2f3": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.185022+00:00",
-      "containerNumber": "CBHU2839428",
-      "bookingNumber": "6435691690",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "ec6ed4c1-714a-426e-b58c-2ee5cdc6f46a": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.186421+00:00",
-      "containerNumber": "SILU7003376",
-      "bookingNumber": "SSZ1711320",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "5d29159c-8d39-4aeb-bd61-aac3010c1157": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.232050+00:00",
-      "containerNumber": "OERU4037603",
-      "bookingNumber": "6435976080",
-      "error": "Not found via available APIs for carrier 'COSCO - INTERTRANS'"
-    },
-    "7be0038a-0adb-4f75-b8d3-8dbebfc536cc": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.488989+00:00",
-      "containerNumber": "SUDU8080450",
-      "bookingNumber": "721212639",
-      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
-    },
-    "2e74fd35-59ae-4de1-9ad0-ab57d38b65fb": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.515912+00:00",
-      "containerNumber": "HLBU6163458",
-      "bookingNumber": "63325330",
-      "error": "Not found via available APIs for carrier 'HAPAG LLOYD'"
-    },
-    "b50a701b-ae4b-46ea-a800-9014f65b4f14": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.679883+00:00",
-      "containerNumber": "TEMU9888048",
-      "bookingNumber": "MBE0522664",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "93aa079a-33c8-4083-86fb-b3e4d59d09fa": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.690280+00:00",
-      "containerNumber": "MMAU1315481",
-      "bookingNumber": "266281132",
-      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
-    },
-    "383f6131-264c-4ca0-9e37-58e3ee210a9c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.746633+00:00",
-      "containerNumber": "MNBU9076269",
-      "bookingNumber": "265401602",
-      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
-    },
-    "d097193f-2497-4952-b297-e562f96ec2db": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.771691+00:00",
-      "containerNumber": "CGMU5092321",
-      "bookingNumber": "SSZ1760570",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "80b34c7a-94f8-4ff4-a80c-ffc763e13868": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.777229+00:00",
-      "containerNumber": "CXRU1004557",
-      "bookingNumber": "SSZ1728763",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "21aa549a-2af0-4baf-a973-91ac467eba51": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.780901+00:00",
-      "containerNumber": "TCLU1331948",
-      "bookingNumber": "SSZ1732864",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "97eafed4-25cc-4ed6-a92b-dadf17b79877": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.797141+00:00",
-      "containerNumber": "MMAU1161025",
-      "bookingNumber": "721274133",
-      "error": "Not found via available APIs for carrier 'MAERSK LINE DO BRASIL'"
-    },
-    "30aeb639-95e6-410d-8095-ac9ecadeca5b": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:42.815973+00:00",
-      "containerNumber": "MNBU9040121",
-      "bookingNumber": "265949982",
-      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
-    },
-    "319237ee-332e-4995-8b00-e3157f3d3030": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.077026+00:00",
-      "containerNumber": "MSGU9087229",
-      "bookingNumber": "3.608E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "c29ab6ab-0058-416e-8cfb-b06e0691a2e2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.087689+00:00",
-      "containerNumber": "TRLU1887556",
-      "bookingNumber": "EBKG16162666",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "430c3fcb-c7fb-4b6d-9d6e-32f8b46c4414": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.207213+00:00",
-      "containerNumber": "TTNU8526915, TTNU8526915",
-      "bookingNumber": "EBKG16037313",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "8e767bf1-c0a8-40a2-befc-8139aaed97b2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.224954+00:00",
-      "containerNumber": "MEDU9852572, MEDU9852572",
-      "bookingNumber": "EBKG16147102",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "f5ece07f-8948-484d-a549-41e1e78db564": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.278047+00:00",
-      "containerNumber": "CXRU1440118",
-      "bookingNumber": "241ISZ2564249",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "79ac7b12-ea29-41a6-936c-b88f7c8fcb3a": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.301299+00:00",
-      "containerNumber": "TGHU9986426",
-      "bookingNumber": "EBKG15578405",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "5a472c8f-ab26-45a2-943b-cc6399a99434": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.317933+00:00",
+      "checkedAt": "2026-06-12T00:19:57.255446+00:00",
       "containerNumber": "MNBU4615861",
       "bookingNumber": "266877255",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "f3c7e32e-6278-4f1f-bd41-23ac3c78290f": {
+    "2e98bb6e-9a67-484d-b4ca-acde1c23cf0d": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.321718+00:00",
+      "checkedAt": "2026-06-12T00:19:57.276977+00:00",
+      "containerNumber": "CGMU5467412",
+      "bookingNumber": "MBE0520433",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "de838ed2-1061-441d-b128-9726bd94edaf": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:57.284380+00:00",
+      "containerNumber": "CGMU5224048",
+      "bookingNumber": "MBE0517467",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "f6ab1df3-4ead-4ba7-b980-96202d8d09ec": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:57.300786+00:00",
       "containerNumber": "MNBU9201397",
       "bookingNumber": "267336072",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "11bfa85a-e4ac-4729-bdd8-032378bb5f05": {
+    "3c89695c-850e-48f8-9ded-7e798a83528b": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.347226+00:00",
+      "checkedAt": "2026-06-12T00:19:57.322244+00:00",
       "containerNumber": "MMAU1261805",
       "bookingNumber": "266577967",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "e55f9d99-7e76-45d5-86aa-e02c253e4b08": {
+    "ae37d521-7d31-4017-a1c5-fa1158bcecb6": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.355460+00:00",
-      "containerNumber": "MNBU4036643",
-      "bookingNumber": "266958103",
+      "checkedAt": "2026-06-12T00:19:57.325960+00:00",
+      "containerNumber": "MMAU1315481",
+      "bookingNumber": "266281132",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "4540a9c8-5cf1-45dc-a801-28d32eed6d6a": {
+    "2ea64a2c-be51-444f-ad04-7ce07231f6d1": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.619559+00:00",
-      "containerNumber": "ONEU9417619",
-      "bookingNumber": "MELG02244300",
-      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
-    },
-    "a2ef42ba-23f5-4c2b-ba1e-40ba499eaca2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.717836+00:00",
-      "containerNumber": "MSDU3003791",
-      "bookingNumber": "EBKG16231651",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "4ff23314-b1d4-41bf-9534-2b258eceac8d": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.801820+00:00",
-      "containerNumber": "OERU4045975",
-      "bookingNumber": "6445134710",
-      "error": "Not found via available APIs for carrier 'COSCO SHIPPING LINES CO., LTD'"
-    },
-    "d162f610-458b-4af9-8f71-1095e70f8c19": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.807341+00:00",
-      "containerNumber": "SZLU9384888",
-      "bookingNumber": "6445134700",
-      "error": "Not found via available APIs for carrier 'COSCO SHIPPING LINES CO., LTD'"
-    },
-    "72d0df6b-deaf-4d8e-954e-effdb3d3f34c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.875086+00:00",
-      "containerNumber": "HLBU6063192",
-      "bookingNumber": "22827041",
-      "error": "Not found via available APIs for carrier 'HAPAG LLOYD'"
-    },
-    "af82335b-8980-45f2-82fc-89664e4c2ac0": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.904563+00:00",
-      "containerNumber": "MNBU4626193",
-      "bookingNumber": "268940077",
-      "error": "Not found via available APIs for carrier 'MAERSK LINE DO BRASIL'"
-    },
-    "c48f592a-ffe1-4d51-b0da-4f31052dd4e9": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.927855+00:00",
-      "containerNumber": "SEGU9245195",
-      "bookingNumber": "BNEG02425900",
-      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
-    },
-    "32b19542-3e80-435d-98cd-efb6f62933ec": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.930988+00:00",
-      "containerNumber": "HLBU9106050",
-      "bookingNumber": "91769417",
-      "error": "Not found via available APIs for carrier 'HAPAG LLOYD'"
-    },
-    "03b824d7-647a-450f-bd39-67dca2ca9d72": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:43.960050+00:00",
-      "containerNumber": "OTPU6454697",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "563ae448-f233-4695-a386-36b3a8918cb4": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.163063+00:00",
-      "containerNumber": "MNBU3617983",
-      "bookingNumber": "268883599",
+      "checkedAt": "2026-06-12T00:19:57.332898+00:00",
+      "containerNumber": "MNBU9040121",
+      "bookingNumber": "265949982",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "74efa4b0-e798-405e-81e6-a76147443c15": {
+    "b1c67c0c-6a63-4b62-861a-bec1f35c152e": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.168873+00:00",
-      "containerNumber": "CXRU1336823",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "0c0234cc-5988-413f-8e63-13db6e060314": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.257960+00:00",
-      "containerNumber": "TTNU8490005",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "aca27542-3dbf-44c4-8c01-7e54c9d3d08f": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.368455+00:00",
-      "containerNumber": "CXRU1327884",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "0b846d37-4dca-4268-ba7e-d2b49d50195c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.372317+00:00",
-      "containerNumber": "TRIU8219636",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "0ae03416-925e-4f0b-aca5-37fe02f491c2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.375024+00:00",
-      "containerNumber": "MEDU9881647",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "bba8512d-552a-4615-8db7-904ff2e7c172": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.416034+00:00",
-      "containerNumber": "MEDU9834497",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "9ccb4fc4-7e5a-4916-8eca-2804ff10037d": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.448804+00:00",
-      "containerNumber": "MSGU9165743",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "6298dc73-e988-451c-9702-3dd8e0927947": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.451492+00:00",
-      "containerNumber": "MSGU9181209",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "49c28c96-3f7d-4340-a0bc-faf242f29c60": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.478688+00:00",
-      "containerNumber": "MEDU9887558",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "6b7a7aed-1a2b-4043-a5fc-9074557925dd": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.700189+00:00",
-      "containerNumber": "CXRU1448356",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "1c5ec6de-ecf6-4ec7-9b61-18798dddbbde": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.822627+00:00",
-      "containerNumber": "SZLU9326330",
-      "bookingNumber": "2.018E+11",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "8d207908-e9cf-4af4-b4e4-784a74e3fc89": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.826139+00:00",
-      "containerNumber": "MSGU9127770",
-      "bookingNumber": "EBKG16394795",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "51bf305c-563c-4d4f-8e9c-03dee42c362a": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.896924+00:00",
-      "containerNumber": "HLBU9389120",
-      "bookingNumber": "12455985",
-      "error": "Not found via available APIs for carrier 'HAPAG LLOYD - INTERTRANS'"
-    },
-    "68b93a87-d6e0-44c7-a5c3-94656b845e64": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.937334+00:00",
-      "containerNumber": "TEMU9399406",
-      "bookingNumber": "EBKG16614274",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "6ad57e3f-e5c5-4096-87a0-94b13617a1a6": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.943845+00:00",
-      "containerNumber": "HLBU9261458",
-      "bookingNumber": "10208926",
-      "error": "Not found via available APIs for carrier 'HAPAG LLOYD - INTERTRANS'"
-    },
-    "f5fd29d3-2a77-4bad-bbd9-fa2f9ab8d4c6": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.952496+00:00",
-      "containerNumber": "MEDU9802144",
-      "bookingNumber": "EBKG16733580",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "b7047af9-4590-4630-b990-e5933dc918d1": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.991026+00:00",
-      "containerNumber": "AMCU9307346",
-      "bookingNumber": "SSZ1784409",
-      "error": "Not found via available APIs for carrier 'CMA CGM DO BRASIL AGENCIA MARITIMA LTDA'"
-    },
-    "00eaf816-0159-4b73-8b35-407069c88f0d": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:44.998686+00:00",
-      "containerNumber": "MSDU9823822",
-      "bookingNumber": "EBKG16827303",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "dc26686b-4248-4f59-82e8-3efe9c5de610": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.020074+00:00",
-      "containerNumber": "CXRU1460114",
-      "bookingNumber": "EBKG16404845",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "c975b517-948d-42b7-8555-2fa661304bd1": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.213974+00:00",
-      "containerNumber": "SZLU9229393",
-      "bookingNumber": "MELG02964500",
-      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
-    },
-    "961c9a8b-0a39-42db-9f72-bc4b541a419c": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.343679+00:00",
-      "containerNumber": "MEDU9820934",
-      "bookingNumber": "EBKG16464082",
-      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
-    },
-    "9a5421e6-4b90-41c6-8c59-eb08c92b0910": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.425625+00:00",
-      "containerNumber": "CGMU5225810",
-      "bookingNumber": "MBE0523496",
+      "checkedAt": "2026-06-12T00:19:57.415775+00:00",
+      "containerNumber": "CGMU5799042",
+      "bookingNumber": "MBE0520458",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "e147f96a-dc89-4d83-a19a-41a030248336": {
+    "f43ddf84-0663-49ef-bb0a-8b71249f874b": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.433650+00:00",
-      "containerNumber": "CGMU5526768",
-      "bookingNumber": "MBE0525177",
+      "checkedAt": "2026-06-12T00:19:57.451067+00:00",
+      "containerNumber": "CRSU6063574",
+      "bookingNumber": "EBKG14788722",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "8936cae4-6350-4071-9d48-8e190cc13f2a": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:57.498606+00:00",
+      "containerNumber": "CXRU1464001",
+      "bookingNumber": "EBKG14788675",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "c96ad361-f2c2-4472-8803-49c6e90ad148": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:57.781119+00:00",
+      "containerNumber": "CXRU1398091",
+      "bookingNumber": "EBKG14788647",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "0d8c5256-efaa-41f1-ba8e-ee2dec84a0d3": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:57.809853+00:00",
+      "containerNumber": "FBIU5105240",
+      "bookingNumber": "MBE0520456",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "047a2b53-0b65-48b5-aa07-d33f791d6a36": {
+    "a88cef5f-fc6b-4a1b-b033-0a30f0e4ecf3": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.449627+00:00",
-      "containerNumber": "BMOU9615800",
-      "bookingNumber": "MBE0522415",
+      "checkedAt": "2026-06-12T00:19:57.854470+00:00",
+      "containerNumber": "CXRU1423759",
+      "bookingNumber": "EBKG14928595",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "379628a1-e106-41a4-8f23-d98c64e0ef10": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:57.858749+00:00",
+      "containerNumber": "AMCU9306870",
+      "bookingNumber": "MBE0521789",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "93364b6a-0b9f-4bd9-b64b-471f4c9859eb": {
+    "51ec1ecd-91be-4ce3-89d6-5b52412a0330": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.462099+00:00",
-      "containerNumber": "AMCU9366143",
-      "bookingNumber": "MBE0525179",
+      "checkedAt": "2026-06-12T00:19:57.917649+00:00",
+      "containerNumber": "CGMU5089014",
+      "bookingNumber": "MBE0520375",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "d6182f4d-9bc2-4a2b-8fa4-6a6e0db4da9a": {
+    "62b026c1-679b-4ac8-8d5b-5d3a846c0312": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.465885+00:00",
-      "containerNumber": "CGMU6935550",
-      "bookingNumber": "MBE0522981",
+      "checkedAt": "2026-06-12T00:19:57.971960+00:00",
+      "containerNumber": "BEAU9703233",
+      "bookingNumber": "MBE0519698",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "43e02da3-2d86-48f8-9fdb-99a5a324e0c9": {
+    "fba76f91-d946-43a1-98cf-ebe43fb32baa": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.497296+00:00",
-      "containerNumber": "CGMU5662173",
-      "bookingNumber": "MBE0525184",
+      "checkedAt": "2026-06-12T00:19:57.997717+00:00",
+      "containerNumber": "SZLU9643037",
+      "bookingNumber": "MBE0513864",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "0962e951-fda8-445b-9eb3-d5574fade9be": {
+    "dd69ba7a-bd2d-4b85-bc66-78865d6274c4": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.508665+00:00",
-      "containerNumber": "TTNU8922351",
-      "bookingNumber": "MBE0522982",
+      "checkedAt": "2026-06-12T00:19:58.009995+00:00",
+      "containerNumber": "TGHU9974528",
+      "bookingNumber": "EBKG14649791",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "1ed2eb06-e75d-4a04-a66c-c2d8dd07703f": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:58.065938+00:00",
+      "containerNumber": "CXRU1401322",
+      "bookingNumber": "EBKG14852456",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "5562fa58-e8dd-4467-96fe-5b29ea944f16": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:58.094736+00:00",
+      "containerNumber": "CGMU5094221",
+      "bookingNumber": "MBE0519624",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "f7b12806-83b2-4f8c-8752-a7cc53113c72": {
+    "e782a45d-25e8-46fe-8ea7-3a3a0df10647": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.562841+00:00",
-      "containerNumber": "CGMU5567427",
-      "bookingNumber": "MBE0525173",
+      "checkedAt": "2026-06-12T00:19:58.310649+00:00",
+      "containerNumber": "SEGU9711251",
+      "bookingNumber": "MBE0518103",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "7ffdb1ab-4ded-4126-90ce-c8c2c740d025": {
+    "e4efa2d1-7004-4fa7-9ed6-8149003b86f8": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.744069+00:00",
-      "containerNumber": "TEMU9115407",
-      "bookingNumber": "MBE0523489",
+      "checkedAt": "2026-06-12T00:19:58.330203+00:00",
+      "containerNumber": "TTNU8703179",
+      "bookingNumber": "MBE0517468",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "39785077-0e1d-4e0a-ab8a-0ba2ee9cd68d": {
+    "de52627d-c78b-4f94-a2d9-7d74b91d4356": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.841968+00:00",
-      "containerNumber": "TCLU1231569",
-      "bookingNumber": "MBE0522682",
+      "checkedAt": "2026-06-12T00:19:58.384981+00:00",
+      "containerNumber": "BMOU9784034",
+      "bookingNumber": "MBE0519066",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "145ec0b3-2f97-4f1d-80ce-a43b9d659647": {
+    "6c0a8fa4-26bb-4c2a-a25c-addb972c945c": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.913907+00:00",
-      "containerNumber": "TTNU8219610",
-      "bookingNumber": "MBE0522715",
+      "checkedAt": "2026-06-12T00:19:58.407234+00:00",
+      "containerNumber": "TTNU8950440",
+      "bookingNumber": "MBE0517465",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "b53102cc-f40d-4ba2-8b91-6caa2cc49c36": {
+    "ad45e54f-da24-43ab-aee0-8eabd6b76bec": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.942578+00:00",
-      "containerNumber": "CGMU9350867",
-      "bookingNumber": "MBE0522709",
+      "checkedAt": "2026-06-12T00:19:58.438503+00:00",
+      "containerNumber": "TTNU8444062",
+      "bookingNumber": "MBE0519064",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "d9cf6b6a-0991-4aa2-b4d2-d86aafa89ad2": {
+    "8c48ce52-00a8-49b4-ab83-46cce9098c8e": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.982018+00:00",
-      "containerNumber": "CGMU9363123",
-      "bookingNumber": "MBE0522979",
+      "checkedAt": "2026-06-12T00:19:58.455625+00:00",
+      "containerNumber": "CGMU5453635",
+      "bookingNumber": "MBE0514572",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "1d26ddb9-43d9-41a8-9a25-71af224b7c73": {
+    "cd2ba88d-e2dc-4dd7-afd9-e23578254321": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:45.999155+00:00",
+      "checkedAt": "2026-06-12T00:19:58.521980+00:00",
+      "containerNumber": "SEGU9448232",
+      "bookingNumber": "MBE0520135",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "0f0ca575-4d2b-414d-9e05-485f4ee364ef": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:58.566930+00:00",
+      "containerNumber": "TTNU8880195",
+      "bookingNumber": "MBE0521934",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "aff4af3f-051e-4b9d-96a6-24ddfb34f4ae": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:58.624265+00:00",
+      "containerNumber": "CGMU5521160",
+      "bookingNumber": "MBE0522847",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "b4958d63-472a-4acc-bd15-256dda14f5a5": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:58.649162+00:00",
       "containerNumber": "CGMU5763435",
       "bookingNumber": "MBE0525176",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "c6f29d01-4ed1-465d-bfaf-e4ab0beae09d": {
+    "ff252f4d-ab89-4e7b-baf6-b8d1c8141159": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.007619+00:00",
-      "containerNumber": "CAIU5660164",
-      "bookingNumber": "MBE0525175",
+      "checkedAt": "2026-06-12T00:19:58.851848+00:00",
+      "containerNumber": "TEMU9888048",
+      "bookingNumber": "MBE0522664",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "e0eff47a-ee41-4ae4-8d35-04e4daa49563": {
+    "2600fd5b-dad1-4e7a-8c8c-b24d0f3d77c5": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.011909+00:00",
-      "containerNumber": "CGMU7011798",
-      "bookingNumber": "MBE0522980",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "f725b513-4bd9-402f-8928-0f0206e3e1eb": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.037037+00:00",
+      "checkedAt": "2026-06-12T00:19:58.855047+00:00",
       "containerNumber": "CGMU5632456",
       "bookingNumber": "MBE0525738",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "1d0e927a-6247-4a3e-a374-17a63975d6ef": {
+    "0ac34ba4-2edd-4628-8c38-15d269ba9fd5": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.065500+00:00",
-      "containerNumber": "TTNU8158500",
-      "bookingNumber": "MBE0522714",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "980a9ba8-465b-4844-b616-683f0c7c19ff": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.236280+00:00",
-      "containerNumber": "CGMU5406910",
-      "bookingNumber": "MBE0526616",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
-    },
-    "13e71e46-11cd-4d44-b08a-e29c3637d804": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.363767+00:00",
+      "checkedAt": "2026-06-12T00:19:58.869762+00:00",
       "containerNumber": "MNBU9116696",
       "bookingNumber": "266118725",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "658d575b-d923-45fc-927b-2d7dee37a3c3": {
+    "27cd5824-6ba0-430d-ba8f-6ba5a508b70c": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.431588+00:00",
-      "containerNumber": "HLBU6246634",
-      "bookingNumber": "13076369",
-      "error": "Not found via available APIs for carrier 'HAPAG LLOYD'"
-    },
-    "89e6fa22-ffc9-4ca4-9e8a-f4126b9745c2": {
-      "autoTracked": false,
-      "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.471628+00:00",
+      "checkedAt": "2026-06-12T00:19:58.937479+00:00",
       "containerNumber": "MNBU0390005",
       "bookingNumber": "266957567",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "3d8c7496-911f-4c80-bbd8-3decf1da7fa7": {
+    "83d6a868-fc86-453b-bcd9-3b5bc3a35d96": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.478755+00:00",
-      "containerNumber": "FBIU5650028",
-      "bookingNumber": "6441821630",
-      "error": "Not found via available APIs for carrier 'COSCO SHIPPING LINES - SANTOS'"
+      "checkedAt": "2026-06-12T00:19:59.003660+00:00",
+      "containerNumber": "FBIU5195921",
+      "bookingNumber": "BNEG03225800",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
     },
-    "24f62eee-dbd0-44f6-92a9-c8ef3d7c6e47": {
+    "39a6b478-e330-4372-921e-af473e36efea": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.517280+00:00",
-      "containerNumber": "SZLU5062625",
-      "bookingNumber": "SSZ1777111",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
+      "checkedAt": "2026-06-12T00:19:59.070209+00:00",
+      "containerNumber": "MSDU3003791",
+      "bookingNumber": "EBKG16231651",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
     },
-    "bbc03747-8c3a-45fd-9628-2fc8e12221f5": {
+    "4c444d8a-f05e-4af5-be30-318c771179a3": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.559975+00:00",
-      "containerNumber": "TTNU8660626",
-      "bookingNumber": "MBE0527954",
-      "error": "Not found via available APIs for carrier 'CMA CGM'"
+      "checkedAt": "2026-06-12T00:19:59.077596+00:00",
+      "containerNumber": "MNBU4036643",
+      "bookingNumber": "266958103",
+      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "7c076362-401d-41b9-b382-5502f0fe78f5": {
+    "c346c783-4e70-41ab-8030-dce42e2c8664": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.568099+00:00",
+      "checkedAt": "2026-06-12T00:19:59.142857+00:00",
+      "containerNumber": "MNBU3617983",
+      "bookingNumber": "268883599",
+      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
+    },
+    "57a51c9a-0c28-4f6f-87ec-d842e1ec1a26": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.146604+00:00",
+      "containerNumber": "MNBU9076269",
+      "bookingNumber": "265401602",
+      "error": "Not found via available APIs for carrier 'MAERSK A/S'"
+    },
+    "ee6d2140-25af-4b43-912a-c0d6c70b09ce": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.163949+00:00",
+      "containerNumber": "ONEU9417619",
+      "bookingNumber": "MELG02244300",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
+    },
+    "63f19a80-26a1-4a32-94b7-1d921d8b4184": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.420087+00:00",
       "containerNumber": "MNBU3735878",
       "bookingNumber": "269514050",
       "error": "Not found via available APIs for carrier 'MAERSK A/S'"
     },
-    "71d61ed2-0941-4343-b49b-8bc0140bb1e6": {
+    "3e857d57-3605-44bf-b64c-a62442ba303c": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.570196+00:00",
-      "containerNumber": "CGMU5765778",
-      "bookingNumber": "MBE0527942",
+      "checkedAt": "2026-06-12T00:19:59.420925+00:00",
+      "containerNumber": "SZLU9229393",
+      "bookingNumber": "MELG02964500",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
+    },
+    "ee841b27-b07e-4270-8d37-8318b6291c1d": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.426646+00:00",
+      "containerNumber": "BMOU9615800",
+      "bookingNumber": "MBE0522415",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "47c43862-d2ce-4923-92a8-42f9b75f61c1": {
+    "35cd0ef0-6dac-4665-8fd8-6c923645f1ba": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.611040+00:00",
-      "containerNumber": "CGMU5450385",
-      "bookingNumber": "MBE0528383",
+      "checkedAt": "2026-06-12T00:19:59.462279+00:00",
+      "containerNumber": "CGMU5225810",
+      "bookingNumber": "MBE0523496",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "1b8179c6-d674-48d4-98c5-29e59571559c": {
+    "b8e8f7ed-8ba7-4a77-9576-3c785dca06ac": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.767444+00:00",
-      "containerNumber": "CGMU6540930",
-      "bookingNumber": "MBE0528490",
+      "checkedAt": "2026-06-12T00:19:59.535023+00:00",
+      "containerNumber": "TCLU1231569",
+      "bookingNumber": "MBE0522682",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "c333a89f-020f-4def-adfc-0c60fcc0f29c": {
+    "fd7fcc23-625c-4e0f-a178-2fbcb8d513e6": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.856885+00:00",
+      "checkedAt": "2026-06-12T00:19:59.624412+00:00",
+      "containerNumber": "CGMU7011798",
+      "bookingNumber": "MBE0522980",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "10bf6f18-04c1-4462-8e0e-afe4e4e628bc": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.635067+00:00",
+      "containerNumber": "AMCU9366143",
+      "bookingNumber": "MBE0525179",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "023923e8-0700-41f6-9996-ee09c72ae3eb": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.668170+00:00",
+      "containerNumber": "CGMU9363123",
+      "bookingNumber": "MBE0522979",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "96e4197d-03a6-4521-b841-ab55809c188e": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.698548+00:00",
+      "containerNumber": "TEMU9115407",
+      "bookingNumber": "MBE0523489",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "92e7b972-82f7-455a-a453-186324b54d8a": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.704948+00:00",
+      "containerNumber": "CGMU6935550",
+      "bookingNumber": "MBE0522981",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "baa0d51d-1af0-40bf-85c6-407694782cd5": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:19:59.988652+00:00",
       "containerNumber": "CGMU6593462",
       "bookingNumber": "MBE0528623",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "b2894668-d11f-4569-b8bb-5a1742aa9191": {
+    "48335319-76b6-4069-b0ea-eef874f40250": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.920167+00:00",
+      "checkedAt": "2026-06-12T00:19:59.999336+00:00",
+      "containerNumber": "TTNU8158500",
+      "bookingNumber": "MBE0522714",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "fe43a93e-a368-4395-bc54-45825ed14de2": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.022810+00:00",
+      "containerNumber": "CGMU6540930",
+      "bookingNumber": "MBE0528490",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "d0fe238c-c2dc-4916-a8b8-55708e14a292": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.034241+00:00",
+      "containerNumber": "TEMU9074144",
+      "bookingNumber": "EBKG17034987",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "1aef3455-4af0-41d2-a3bc-fe637ac02b8a": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.062593+00:00",
+      "containerNumber": "CGMU5662173",
+      "bookingNumber": "MBE0525184",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "e8975241-407d-4df3-b960-0a301e0856d0": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.189379+00:00",
+      "containerNumber": "TTNU8219610",
+      "bookingNumber": "MBE0522715",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "367d2e92-84b5-4a4f-bb97-44ac8fcf1df1": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.196149+00:00",
+      "containerNumber": "CXRU1449706",
+      "bookingNumber": "EBKG16973111",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "fb1a962f-3679-4b61-acfe-e5eb18172c58": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.236886+00:00",
+      "containerNumber": "CGMU5765778",
+      "bookingNumber": "MBE0527942",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "85dec508-22dc-4e35-9d43-3f6c09fb5b16": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.267059+00:00",
+      "containerNumber": "TTNU8922351",
+      "bookingNumber": "MBE0522982",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "8925cdb6-ab94-4da8-901e-f89b971db23e": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.304234+00:00",
+      "containerNumber": "CGMU5450385",
+      "bookingNumber": "MBE0528383",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "43c6f6f3-b19c-4416-ad23-ba8070e9af29": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.502139+00:00",
+      "containerNumber": "TTNU8660626",
+      "bookingNumber": "MBE0527954",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "9a18a801-76b8-4a35-acb6-8495db4f8efd": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.518926+00:00",
+      "containerNumber": "CGMU9350867",
+      "bookingNumber": "MBE0522709",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "a59d7b39-eeba-4dc0-a441-0c0a7c3e6b4f": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.576451+00:00",
+      "containerNumber": "CXRU1452973",
+      "bookingNumber": "EBKG17059270",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "a587f529-4a0c-43eb-a87b-0a82c71e38e3": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.581686+00:00",
+      "containerNumber": "CAIU5660164",
+      "bookingNumber": "MBE0525175",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "f1e5bd2d-1efb-4314-8dbb-cf0458595ae2": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.617180+00:00",
+      "containerNumber": "CGMU5567427",
+      "bookingNumber": "MBE0525173",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "67898116-1f60-44d9-9926-feaaafdb0ed2": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.756474+00:00",
       "containerNumber": "CGMU5734669",
       "bookingNumber": "MBE0527955",
       "error": "Not found via available APIs for carrier 'CMA CGM'"
     },
-    "4873a415-4f58-4897-89c6-458dff885ad4": {
+    "46900f15-1af6-44a9-a572-05f107e424ec": {
       "autoTracked": false,
       "skipped": false,
-      "checkedAt": "2026-06-11T22:05:46.944690+00:00",
+      "checkedAt": "2026-06-12T00:20:00.759745+00:00",
+      "containerNumber": "CGMU5526768",
+      "bookingNumber": "MBE0525177",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "dc4e756f-2696-44a4-9c43-e9825da3ebc2": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.810037+00:00",
+      "containerNumber": "CGMU5406910",
+      "bookingNumber": "MBE0526616",
+      "error": "Not found via available APIs for carrier 'CMA CGM'"
+    },
+    "7ecc3f87-4599-4fec-9f05-601fc619f188": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.816753+00:00",
       "containerNumber": "OTPU6056991",
       "bookingNumber": "EBKG16976377",
       "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "831ac0d0-8bf5-4ee5-a05e-c1ad14b03860": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:00.827548+00:00",
+      "containerNumber": "SEGU9245195",
+      "bookingNumber": "BNEG02425900",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
+    },
+    "de29775d-37cd-4280-9163-0fad223797c1": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.021249+00:00",
+      "containerNumber": "CXRU1454997",
+      "bookingNumber": "EBKG17060349",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "f3e3e66d-cf1d-45b9-944e-10222af662d6": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.038548+00:00",
+      "containerNumber": "TGHU9993596",
+      "bookingNumber": "EBKG17060485",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "c339a932-33ad-4faa-8879-5ac5f7b220c1": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.113707+00:00",
+      "containerNumber": "FSCU5942099",
+      "bookingNumber": "MELG03432300",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
+    },
+    "ecb1f816-d476-4367-ab2b-f71fa746d381": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.146932+00:00",
+      "containerNumber": "FSCU5957967",
+      "bookingNumber": "MELG03101300",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
+    },
+    "4fd70545-a7b0-4542-aa4a-3138cb5a8e41": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.185281+00:00",
+      "containerNumber": "TRIU8499096",
+      "bookingNumber": "EBKG17190232",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "e73826c7-a7b2-40a9-9ebb-ed69a2026427": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.265691+00:00",
+      "containerNumber": "TEMU9305217",
+      "bookingNumber": "EBKG17169209",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "8eaeae02-c948-439b-8b81-d8b96a11a18d": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.280826+00:00",
+      "containerNumber": "GESU9529710",
+      "bookingNumber": "EBKG17094493",
+      "error": "Not found via available APIs for carrier 'MSC MEDITERRANEAN SHIPPING COMPANY PARAGUAY S.A.'"
+    },
+    "b7afa99f-0f03-4ded-a61f-f1058def8317": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.330082+00:00",
+      "containerNumber": "SZLU9322931",
+      "bookingNumber": "EBKG17169865",
+      "error": "Not found via available APIs for carrier 'MSC - MEDITERRANEAN SHIPPING COMPANY'"
+    },
+    "282e3077-8ce5-49e1-b374-dee49b916a7d": {
+      "autoTracked": false,
+      "skipped": false,
+      "checkedAt": "2026-06-12T00:20:01.375598+00:00",
+      "containerNumber": "OTPU6400406",
+      "bookingNumber": "BNEG03226900",
+      "error": "Not found via available APIs for carrier 'ONE - OCEAN NETWORK EXPRESS'"
     }
   }
 }
